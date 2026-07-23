@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- <meta charset="UTF-8"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5S数据处理工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            color: #fff;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+        .input-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-size: 1.1rem;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4dabf7;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 25px;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .result-group {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: #4facfe;
+        }
+        .result-content {
+            font-family: monospace;
+            font-size: 1.3rem;
+            word-break: break-all;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            min-height: 50px;
+            margin-bottom: 15px;
+        }
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .copy-btn:hover {
+            background: linear-gradient(to right, #009174, #82b434);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .copy-btn i {
+            margin-right: 8px;
+        }
+        .explanation {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .explanation h3 {
+            margin-bottom: 15px;
+            color: #4facfe;
+        }
+        .explanation p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .explanation ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        .explanation li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        .highlight {
+            color: #ffd43b;
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .container {
+                padding: 20px;
+            }
+            .result-content {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>5S数据处理工具</h1>
+        
+        <p class="description">输入十六进制数据（空格分隔），系统将计算累加和并生成完整数据包</p>
+        
+        <div class="input-group">
+            <label for="hexInput">输入十六进制数据：</label>
+            <input type="text" id="hexInput" placeholder="例如: 1A 52 07 00 2D 01 1C 4B C4 12" value="1A 52 07 00 2D 01 1C 4B C4 12">
+        </div>
+        
+        <button class="btn" id="processBtn">处理数据</button>
+        
+        <div class="result-group">
+            <div class="result-title">计算结果：</div>
+            <div class="result-content" id="checksumResult">等待计算...</div>
+        </div>
+        
+        <div class="result-group">
+            <div class="result-title">完整数据包：</div>
+            <div class="result-content" id="fullPacket">等待生成...</div>
+            <button class="copy-btn" id="copyBtn">
+                <i class="fas fa-copy"></i>复制数据
+            </button>
+        </div>
+        
+        <div class="explanation">
+            <h3>处理说明：</h3>
+            <p>此工具将：</p>
+            <ul>
+                <li>验证并解析输入的十六进制数据</li>
+                <li>计算所有字节的累加和（取低16位）</li>
+                <li>在头部添加起始符 <span class="highlight">3A</span></li>
+                <li>在尾部添加校验和（小端格式）和结束符 <span class="highlight">0D 0A</span></li>
+            </ul>
+            <p>示例：输入 "<span class="highlight">1A 52 07 00 2D 01 1C 4B C4 12</span>"</p>
+            <p>累加和 = 0x<span class="highlight">1DE</span> → 校验和 = <span class="highlight">DE 01</span>（小端格式）</p>
+            <p>结果：<span class="highlight">3A 1A 52 07 00 2D 01 1C 4B C4 12 DE 01 0D 0A</span></p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>© 数据处理工具 | 设计用于通信协议数据包生成</p>
+    </div>
+
+    <div class="toast" id="toast">数据已复制到剪贴板！</div>
+
+    <script>
+        document.getElementById('processBtn').addEventListener('click', function() {
+            // 获取输入值
+            const input = document.getElementById('hexInput').value.trim();
+            
+            // 验证输入
+            if (!input) {
+                alert('请输入十六进制数据！');
+                return;
+            }
+            
+            // 分割输入并验证每个十六进制数
+            const hexArray = input.split(/\s+/);
+            const values = [];
+            
+            for (let hex of hexArray) {
+                // 确保是有效的十六进制数
+                if (!/^[0-9A-Fa-f]{1,2}$/.test(hex)) {
+                    alert(`无效的十六进制数: ${hex}`);
+                    return;
+                }
+                
+                // 将十六进制字符串转换为数值
+                values.push(parseInt(hex, 16));
+            }
+            
+            // 计算累加和
+            let checksum = 0;
+            for (let value of values) {
+                checksum += value;
+            }
+            
+            // 取低16位
+            checksum = checksum & 0xFFFF;
+            
+            // 显示累加和
+            document.getElementById('checksumResult').textContent = `0x${checksum.toString(16).toUpperCase()}`;
+            
+            // 构建完整数据包
+            // 起始符
+            let result = '3A';
+            
+            // 添加原始数据
+            for (let value of values) {
+                result += ' ' + value.toString(16).padStart(2, '0').toUpperCase();
+            }
+            
+            // 添加校验和（小端格式：低字节在前，高字节在后）
+            const lowByte = checksum & 0xFF;
+            const highByte = (checksum >> 8) & 0xFF;
+            result += ' ' + lowByte.toString(16).padStart(2, '0').toUpperCase();
+            result += ' ' + highByte.toString(16).padStart(2, '0').toUpperCase();
+            
+            // 添加结束符
+            result += ' 0D 0A';
+            
+            // 显示结果
+            document.getElementById('fullPacket').textContent = result;
+        });
+
+        // 复制功能
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const textToCopy = document.getElementById('fullPacket').textContent;
+            
+            if (textToCopy === '等待生成...') {
+                alert('请先生成数据包！');
+                return;
+            }
+            
+            // 使用Clipboard API复制文本
+            navigator.clipboard.writeText(textToCopy).then(function() {
+                // 显示成功提示
+                const toast = document.getElementById('toast');
+                toast.textContent = '数据已复制到剪贴板！';
+                toast.classList.add('show');
+                
+                // 2秒后隐藏提示
+                setTimeout(function() {
+                    toast.classList.remove('show');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('复制失败: ', err);
+                alert('复制失败，请手动复制文本。');
+            });
+        });
+
+        // 初始加载时处理示例数据
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('processBtn').click();
+        });
+    </script>
+</body>
+</html>

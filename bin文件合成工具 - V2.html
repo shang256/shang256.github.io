@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- <meta charset="UTF-8"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIN文件合成工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+        
+        .subtitle {
+            color: #bbbbbb;
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .upload-section {
+            background: rgba(30, 40, 70, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #4fc3f7;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #4db6ac;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(30, 40, 60, 0.5);
+            margin-bottom: 25px;
+        }
+        
+        .upload-area:hover {
+            background: rgba(30, 40, 60, 0.7);
+            border-color: #4fc3f7;
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            color: #4db6ac;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .upload-hint {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #4db6ac, #4fc3f7);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to right, #546e7a, #78909c);
+        }
+        
+        .files-list {
+            margin-top: 30px;
+        }
+        
+        .file-card {
+            background: rgba(40, 50, 80, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            border-left: 4px solid #4db6ac;
+        }
+        
+        .file-card:hover {
+            background: rgba(50, 60, 90, 0.8);
+            transform: translateX(5px);
+        }
+        
+        .file-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+            color: #4db6ac;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+        
+        .file-details {
+            display: flex;
+            color: #bbb;
+            font-size: 0.9rem;
+            gap: 15px;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: #bbb;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            color: #ff5252;
+        }
+        
+        .config-section {
+            background: rgba(30, 40, 70, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #bbbbbb;
+            font-weight: 500;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #546e7a;
+            background: rgba(30, 40, 60, 0.7);
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4fc3f7;
+            box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.3);
+        }
+        
+        .address-hint {
+            font-size: 0.85rem;
+            color: #78909c;
+            margin-top: 5px;
+        }
+        
+        .progress-container {
+            margin: 30px 0;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #37474f;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4db6ac, #4fc3f7);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            color: #bbbbbb;
+            font-size: 0.9rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: #263238;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            animation: modalAppear 0.4s ease;
+        }
+        
+        @keyframes modalAppear {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: #bbb;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #78909c;
+            font-size: 0.9rem;
+            padding: 20px;
+        }
+        
+        .hex-prefix {
+            background: #37474f;
+            padding: 11px 12px;
+            border-radius: 8px 0 0 8px;
+            font-size: 1rem;
+        }
+        
+        .hex-input {
+            display: flex;
+        }
+        
+        .hex-input input {
+            border-radius: 0 8px 8px 0;
+            flex: 1;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .status.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+            display: block;
+        }
+        
+        .status.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            display: block;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #78909c;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+    .file-card.selected {
+            border-left-color: #4fc3f7;
+            background: rgba(50, 60, 100, 0.8);
+        }
+        .file-card.selected .file-icon {
+            color: #4fc3f7;
+        }
+        .file-card.selected .file-actions i {
+            color: #4fc3f7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-file-binary"></i> BIN文件合成工具</h1>
+            <p class="subtitle">添加多个BIN文件并指定插入地址，合成一个完整的二进制文件。第一个文件地址默认为0x0000，后续文件需要指定插入地址。</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h2 class="section-title"><i class="fas fa-file-upload"></i> 添加BIN文件</h2>
+                
+                <div class="upload-area" id="dropZone">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <p class="upload-text">拖放文件到此处或点击上传</p>
+                    <p class="upload-hint">支持多个.bin文件上传</p>
+                    <button class="btn" id="uploadBtn">
+                        <i class="fas fa-plus"></i> 选择文件
+                    </button>
+                </div>
+                
+                <div class="status" id="statusMessage"></div>
+                
+                <div class="files-list" id="filesList">
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>尚未添加任何文件</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <h2 class="section-title"><i class="fas fa-cog"></i> 合成配置</h2>
+                
+                <div class="input-group">
+                    <label for="outputName">输出文件名</label>
+                    <div class="hex-input">
+                        <input type="text" id="outputName" placeholder="例如：firmware" value="combined" style="border-radius: 8px 0 0 8px;">
+                        <div class="hex-prefix" style="border-radius: 0 8px 8px 0; margin-left: -1px;">.bin</div>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label>填充字节</label>
+                    <div style="display: flex; gap: 15px;">
+                        <div style="flex: 1;">
+                            <label for="fillByte" style="font-size: 0.9rem;">默认：0x00</label>
+                            <input type="text" id="fillByte" maxlength="2" value="00" style="text-transform: uppercase;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">等待操作...</div>
+                </div>
+                
+                <button class="btn" id="mergeBtn" style="width: 100%;">
+                    <i class="fas fa-cogs"></i> 开始合成
+                </button>
+                
+                <button class="btn btn-secondary" id="resetBtn" style="width: 100%; margin-top: 15px;">
+                    <i class="fas fa-trash-alt"></i> 重置所有
+                </button>
+                
+                <div class="info-box" style="margin-top: 30px; background: rgba(40, 50, 80, 0.5); padding: 15px; border-radius: 10px;">
+                    <h3 style="margin-bottom: 10px; color: #4fc3f7;"><i class="fas fa-info-circle"></i> 使用说明</h3>
+                    <ul style="padding-left: 20px; color: #bbb; line-height: 1.8;">
+                        <li>第一个文件地址默认为0x0000</li>
+                        <li>后续文件需要指定插入地址</li>
+                        <li>地址格式为十六进制（例如：0x1000）</li>
+                        <li>文件之间的空隙将使用填充字节填充</li>
+                        <li>文件重叠部分将被覆盖</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p> 2025 BIN文件合成工具 | 基于Web技术的二进制文件处理工具</p>
+        </footer>
+    </div>
+    
+    <div class="modal" id="addressModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>设置插入地址</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <div class="input-group">
+                <label for="addressInput">十六进制地址 (例如：0x8000)</label>
+                <div class="hex-input">
+                    <div class="hex-prefix">0x</div>
+                    <input type="text" id="addressInput" placeholder="8000" maxlength="6" style="text-transform: uppercase;">
+                </div>
+                <p class="address-hint">请输入该文件在最终BIN文件中的起始地址</p>
+            </div>
+            
+            <div class="file-info-preview">
+                <div class="file-card">
+                    <div class="file-icon">
+                        <i class="fas fa-file"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name" id="modalFileName">file.bin</div>
+                        <div class="file-details">
+                            <span id="modalFileSize">0 KB</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn" id="confirmAddress">
+                    <i class="fas fa-check"></i> 确认地址
+                </button>
+                <button class="btn btn-secondary" id="cancelAddress">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+<div class="modal" id="firstFileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>选择第一个文件</h2>
+                <button class="close-firstfile-modal">&times;</button>
+            </div>
+            
+            <div class="input-group">
+                <p>请选择哪个文件作为第一个文件（地址0x0000）：</p>
+                <div class="files-selection" id="firstFileOptions" style="margin-top: 15px;">
+                    <!-- 文件选项将动态生成 -->
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn" id="confirmFirstFile">
+                    <i class="fas fa-check"></i> 确认选择
+                </button>
+                <button class="btn btn-secondary" id="cancelFirstFile">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <input type="file" id="fileInput" accept=".bin" multiple style="display: none;">
+    
+    <script>
+        // 全局变量
+        let files = [];
+        let currentFile = null;
+        let pendingFiles = [];
+        const statusMessage = document.getElementById('statusMessage');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        
+        // DOM元素
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const filesList = document.getElementById('filesList');
+        const mergeBtn = document.getElementById('mergeBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const addressModal = document.getElementById('addressModal');
+        const addressInput = document.getElementById('addressInput');
+        const modalFileName = document.getElementById('modalFileName');
+        const modalFileSize = document.getElementById('modalFileSize');
+        const confirmAddress = document.getElementById('confirmAddress');
+        const cancelAddress = document.getElementById('cancelAddress');
+        const closeModal = document.querySelector('.close-modal');
+        const outputName = document.getElementById('outputName');
+        const firstFileModal = document.getElementById('firstFileModal');
+        const firstFileOptions = document.getElementById('firstFileOptions');
+        const confirmFirstFile = document.getElementById('confirmFirstFile');
+        const cancelFirstFile = document.getElementById('cancelFirstFile');
+        const closeFirstFileModalBtn = document.querySelector('.close-firstfile-modal');
+        
+        // 事件监听
+        uploadBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('drop', handleDrop);
+        mergeBtn.addEventListener('click', mergeFiles);
+        resetBtn.addEventListener('click', resetAll);
+        confirmAddress.addEventListener('click', saveAddress);
+        cancelAddress.addEventListener('click', closeAddressModal);
+        closeModal.addEventListener('click', closeAddressModal);
+        confirmFirstFile.addEventListener('click', confirmFirstFileSelection);
+        cancelFirstFile.addEventListener('click', closeFirstFileModal);
+        closeFirstFileModalBtn.addEventListener('click', closeFirstFileModal);
+        
+        // 处理文件选择
+        function handleFileSelect(e) {
+            const selectedFiles = e.target.files;
+            if (selectedFiles.length > 0) {
+                processFiles(selectedFiles);
+            }
+            fileInput.value = '';
+        }
+        
+        // 处理拖放
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = '#4fc3f7';
+            dropZone.style.backgroundColor = 'rgba(30, 40, 60, 0.7)';
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = '#4db6ac';
+            dropZone.style.backgroundColor = 'rgba(30, 40, 60, 0.5)';
+            
+            const droppedFiles = e.dataTransfer.files;
+            if (droppedFiles.length > 0) {
+                processFiles(droppedFiles);
+            }
+        }
+        
+        // 处理文件添加
+        function processFiles(fileList) {
+            // 过滤非BIN文件
+            const binFiles = [];
+            for (let i = 0; i < fileList.length; i++) {
+                const file = fileList[i];
+                if (!file.name.toLowerCase().endsWith('.bin')) {
+                    showStatus(`错误：${file.name} 不是BIN文件`, 'error');
+                } else {
+                    binFiles.push(file);
+                }
+            }
+            
+            if (binFiles.length === 0) return;
+            
+            // 如果当前没有文件，且拖放了多个文件
+            if (files.length === 0 && binFiles.length > 1) {
+                pendingFiles = binFiles;
+                showFirstFileModal(binFiles);
+                return;
+            }
+            
+            // 单个文件或已有文件的情况
+            for (let i = 0; i < binFiles.length; i++) {
+                const file = binFiles[i];
+                
+                // 第一个文件不需要地址
+                if (files.length === 0) {
+                    files.push({
+                        file: file,
+                        address: 0,
+                        size: file.size
+                    });
+                    renderFilesList();
+                } else {
+                    // 后续文件需要地址
+                    currentFile = file;
+                    showAddressModal(file);
+                }
+            }
+        }
+        
+        // 显示地址输入模态框
+        function showAddressModal(file) {
+            modalFileName.textContent = file.name;
+            modalFileSize.textContent = formatFileSize(file.size);
+            addressInput.value = '8000';  // 修改这行：默认填充为8000
+            addressModal.style.display = 'flex';
+            addressInput.focus();
+        }
+        
+        // 关闭地址模态框
+        function closeAddressModal() {
+            addressModal.style.display = 'none';
+            currentFile = null;
+        }
+        
+        // 关闭第一个文件选择模态框
+        function closeFirstFileModal() {
+            firstFileModal.style.display = 'none';
+            pendingFiles = [];
+        }
+
+        // 显示第一个文件选择模态框
+        function showFirstFileModal(filesArray) {
+            // 清空选项
+            firstFileOptions.innerHTML = '';
+            
+            // 为每个文件创建选项
+            filesArray.forEach((file, index) => {
+                const option = document.createElement('div');
+                option.className = 'file-card';
+                option.style.cursor = 'pointer';
+                option.style.marginBottom = '10px';
+                option.dataset.index = index;
+                
+                option.innerHTML = `
+                    <div class="file-icon">
+                        <i class="fas fa-file"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-details">
+                            <span>${formatFileSize(file.size)}</span>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <i class="fas fa-check" style="color: #4db6ac; font-size: 1.2rem;"></i>
+                    </div>
+                `;
+                
+                // 点击选择
+                option.addEventListener('click', () => {
+                    // 移除之前的选择
+                    document.querySelectorAll('.file-card.selected').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    option.classList.add('selected');
+                });
+                
+                firstFileOptions.appendChild(option);
+            });
+            
+            // 默认选择第一个
+            firstFileOptions.querySelector('.file-card').classList.add('selected');
+            
+            firstFileModal.style.display = 'flex';
+        }
+
+        // 确认第一个文件选择
+        function confirmFirstFileSelection() {
+            const selectedCard = firstFileOptions.querySelector('.file-card.selected');
+            if (!selectedCard) {
+                showStatus('错误：请选择一个文件作为第一个文件', 'error');
+                return;
+            }
+            
+            const selectedIndex = parseInt(selectedCard.dataset.index);
+            const selectedFile = pendingFiles[selectedIndex];
+            
+            // 添加第一个文件（地址0）
+            files.push({
+                file: selectedFile,
+                address: 0,
+                size: selectedFile.size
+            });
+            
+            // 处理剩余文件，需要地址
+            for (let i = 0; i < pendingFiles.length; i++) {
+                if (i === selectedIndex) continue;
+                const file = pendingFiles[i];
+                currentFile = file;
+                showAddressModal(file);
+            }
+            
+            renderFilesList();
+            closeFirstFileModal();
+        }
+
+        // 保存地址
+        function saveAddress() {
+            const hexValue = addressInput.value.trim();
+            
+            if (!hexValue) {
+                showStatus('错误：请输入有效的十六进制地址', 'error');
+                return;
+            }
+            
+            // 验证十六进制格式
+            const hexRegex = /^[0-9A-Fa-f]+$/;
+            if (!hexRegex.test(hexValue)) {
+                showStatus('错误：请输入有效的十六进制值（0-9, A-F）', 'error');
+                return;
+            }
+            
+            // 转换为十进制
+            const address = parseInt(hexValue, 16);
+            
+            if (isNaN(address)) {
+                showStatus('错误：无法解析地址', 'error');
+                return;
+            }
+            
+            files.push({
+                file: currentFile,
+                address: address,
+                size: currentFile.size
+            });
+            
+            renderFilesList();
+            closeAddressModal();
+        }
+        
+        // 渲染文件列表
+        function renderFilesList() {
+            if (files.length === 0) {
+                filesList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>尚未添加任何文件</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filesList.innerHTML = '';
+            
+            // 按地址排序
+            const sortedFiles = [...files].sort((a, b) => a.address - b.address);
+            
+            sortedFiles.forEach((fileInfo, index) => {
+                const fileCard = document.createElement('div');
+                fileCard.className = 'file-card';
+                fileCard.innerHTML = `
+                    <div class="file-icon">
+                        <i class="fas fa-file"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">${fileInfo.file.name}</div>
+                        <div class="file-details">
+                            <span>${formatFileSize(fileInfo.size)}</span>
+                            <span>地址: 0x${fileInfo.address.toString(16).toUpperCase().padStart(4, '0')}</span>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="action-btn delete-btn" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                filesList.appendChild(fileCard);
+            });
+            
+            // 添加删除事件监听
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    files.splice(index, 1);
+                    renderFilesList();
+                });
+            });
+        }
+        
+        // 合并文件
+        async function mergeFiles() {
+            if (files.length === 0) {
+                showStatus('错误：请先添加至少一个文件', 'error');
+                return;
+            }
+            
+            if (!outputName.value.trim()) {
+                showStatus('错误：请输入输出文件名', 'error');
+                return;
+            }
+            
+            // 确保文件名以.bin结尾
+            let filename = outputName.value.trim();
+            if (!filename.toLowerCase().endsWith('.bin')) {
+                filename += '.bin';
+            }
+            
+            const fillByte = document.getElementById('fillByte').value || 'FF';
+            if (!/^[0-9A-Fa-f]{1,2}$/.test(fillByte)) {
+                showStatus('错误：填充字节必须是有效的十六进制值', 'error');
+                return;
+            }
+            const fillValue = parseInt(fillByte, 16);
+            
+            // 按地址排序
+            const sortedFiles = [...files].sort((a, b) => a.address - b.address);
+            
+            // 计算总文件大小
+            let totalSize = 0;
+            sortedFiles.forEach(fileInfo => {
+                const endAddress = fileInfo.address + fileInfo.size;
+                if (endAddress > totalSize) totalSize = endAddress;
+            });
+            
+            updateProgress(0, '正在准备合成...');
+            
+            try {
+                // 创建ArrayBuffer
+                const buffer = new ArrayBuffer(totalSize);
+                const view = new Uint8Array(buffer);
+                
+                // 填充默认值
+                for (let i = 0; i < totalSize; i++) {
+                    view[i] = fillValue;
+                }
+                
+                // 处理每个文件
+                for (let i = 0; i < sortedFiles.length; i++) {
+                    const fileInfo = sortedFiles[i];
+                    const file = fileInfo.file;
+                    
+                    updateProgress(i / sortedFiles.length * 50, 
+                                  `正在处理: ${file.name} (${i+1}/${sortedFiles.length})`);
+                    
+                    // 读取文件内容
+                    const fileBuffer = await readFileAsArrayBuffer(file);
+                    const fileData = new Uint8Array(fileBuffer);
+                    
+                    // 复制到主缓冲区
+                    for (let j = 0; j < fileData.length; j++) {
+                        view[fileInfo.address + j] = fileData[j];
+                    }
+                }
+                
+                updateProgress(100, '合成完成！');
+                
+                // 创建Blob并下载
+                const blob = new Blob([view], {type: 'application/octet-stream'});
+                
+                // 尝试使用文件选择器API保存文件
+                try {
+                    if ('showSaveFilePicker' in window) {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: filename,
+                            types: [{
+                                description: 'BIN文件',
+                                accept: {'application/octet-stream': ['.bin']}
+                            }]
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                        showStatus(`成功保存文件: ${filename}`, 'success');
+                    } else {
+                        // 回退到下载方式
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        showStatus(`成功合成文件: ${filename}`, 'success');
+                    }
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        showStatus('保存已取消', 'error');
+                    } else {
+                        throw error;
+                    }
+                }
+                
+            } catch (error) {
+                console.error('文件合成错误:', error);
+                updateProgress(0, '合成失败');
+                showStatus(`错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 读取文件为ArrayBuffer
+        function readFileAsArrayBuffer(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+        
+        // 重置所有
+        function resetAll() {
+            if (files.length === 0) return;
+            
+            if (confirm('确定要重置所有文件吗？')) {
+                files = [];
+                renderFilesList();
+                outputName.value = 'combined.bin';
+                document.getElementById('fillByte').value = 'FF';
+                updateProgress(0, '等待操作...');
+                statusMessage.style.display = 'none';
+            }
+        }
+        
+        // 更新进度条
+        function updateProgress(percent, text) {
+            progressFill.style.width = `${percent}%`;
+            progressText.textContent = text;
+        }
+        
+        // 显示状态消息
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status';
+            statusMessage.classList.add(type);
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 初始化
+        renderFilesList();
+    </script>
+</body>
+</html>
