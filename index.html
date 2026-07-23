@@ -1,22 +1,279 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我的工具合集</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具导航</title>
+    <style>
+        /* --- 全局重置 & 基础样式 --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        /* --- 页面头部 --- */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            letter-spacing: 2px;
+        }
+
+        .page-title span {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-sub {
+            color: #888;
+            font-size: 1rem;
+            margin-top: 6px;
+            letter-spacing: 1px;
+        }
+
+        /* --- 品牌分区 --- */
+        .brand-section {
+            margin-bottom: 48px;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8ecf1;
+        }
+
+        .brand-badge {
+            display: inline-block;
+            padding: 4px 18px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-ditai {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .badge-weilegao {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .brand-header h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        /* --- 卡片网格 --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .tool-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 22px;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #f0f0f0;
+            text-decoration: none;
+            color: #1a1a2e;
+            transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            border-color: transparent;
+        }
+
+        /* 品牌主题色 —— 左侧边框 */
+        .card-ditai {
+            border-left: 4px solid #764ba2;
+        }
+
+        .card-weilegao {
+            border-left: 4px solid #f5576c;
+        }
+
+        .tool-icon {
+            font-size: 1.8rem;
+            line-height: 1;
+            flex-shrink: 0;
+            width: 40px;
+            text-align: center;
+        }
+
+        .tool-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tool-name {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tool-desc {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        /* --- 响应式适配 --- */
+        @media (max-width: 640px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .brand-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .tool-card {
+                padding: 16px 18px;
+            }
+
+            .tool-name {
+                white-space: normal;
+            }
+        }
+
+        /* 小屏设备下卡片间距优化 */
+        @media (max-width: 400px) {
+            .tool-icon {
+                font-size: 1.5rem;
+                width: 32px;
+            }
+            .tool-name {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>⚙️ 迪太工具导航</h1>
-    <ul>
-        <li><a href="dt_bin文件合成工具.html">迪太组合包合成工具</a></li>
-        <li><a href="迪太UI烧片文件合成工具V001.html">迪太UI烧片文件合成工具</a></li>
-        <li><a href="asciiTohex.html">ASCII - HEX - DEX </a></li>
-        <li><a href="5s协议计算.html">5s_协议计算</a></li>
-    </ul>
-    <h1>⚙️ 唯乐高工具导航</h1>
-    <ul>
-        <li><a href="上位机升级bin合成工具_V2.html">唯乐高上位机升级bin合成工具</a></li>
-        <li><a href="追溯码规则生成器.html">追溯码规则生成器</a></li>
-        <li><a href="bel_wlg_crc.html">唯乐高蓝牙协议校验工具</a></li>        
-    </ul>
+
+<div class="container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <h1 class="page-title">🧰 <span>工具导航</span></h1>
+        <p class="page-sub">点击卡片直达 · 收藏此页方便查找</p>
+    </div>
+
+    <!-- ========== 迪太工具 ========== -->
+    <div class="brand-section">
+        <div class="brand-header">
+            <span class="brand-badge badge-ditai">迪太</span>
+            <h2>内部工具集</h2>
+        </div>
+        <div class="card-grid">
+            <a href="dt_bin文件合成工具.html" class="tool-card card-ditai">
+                <span class="tool-icon">📦</span>
+                <span class="tool-info">
+                    <span class="tool-name">迪太组合包合成工具</span>
+                    <span class="tool-desc">bin 文件合成</span>
+                </span>
+            </a>
+            <a href="迪太UI烧片文件合成工具V001.html" class="tool-card card-ditai">
+                <span class="tool-icon">🔥</span>
+                <span class="tool-info">
+                    <span class="tool-name">迪太UI烧片文件合成工具</span>
+                    <span class="tool-desc">烧片文件合成 V001</span>
+                </span>
+            </a>
+            <a href="asciiTohex.html" class="tool-card card-ditai">
+                <span class="tool-icon">🔄</span>
+                <span class="tool-info">
+                    <span class="tool-name">ASCII ⇄ HEX ⇄ DEC</span>
+                    <span class="tool-desc">编码转换工具</span>
+                </span>
+            </a>
+            <a href="5s协议计算.html" class="tool-card card-ditai">
+                <span class="tool-icon">📡</span>
+                <span class="tool-info">
+                    <span class="tool-name">5S 协议计算</span>
+                    <span class="tool-desc">协议校验与计算</span>
+                </span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ========== 唯乐高工具 ========== -->
+    <div class="brand-section">
+        <div class="brand-header">
+            <span class="brand-badge badge-weilegao">唯乐高</span>
+            <h2>产品工具集</h2>
+        </div>
+        <div class="card-grid">
+            <a href="上位机升级bin合成工具_V2.html" class="tool-card card-weilegao">
+                <span class="tool-icon">⚙️</span>
+                <span class="tool-info">
+                    <span class="tool-name">唯乐高上位机升级bin合成工具</span>
+                    <span class="tool-desc">固件升级包合成 V2</span>
+                </span>
+            </a>
+            <a href="追溯码规则生成器.html" class="tool-card card-weilegao">
+                <span class="tool-icon">🏷️</span>
+                <span class="tool-info">
+                    <span class="tool-name">追溯码规则生成器</span>
+                    <span class="tool-desc">追溯码规则配置</span>
+                </span>
+            </a>
+            <a href="bel_wlg_crc.html" class="tool-card card-weilegao">
+                <span class="tool-icon">🔐</span>
+                <span class="tool-info">
+                    <span class="tool-name">唯乐高蓝牙协议校验工具</span>
+                    <span class="tool-desc">BEL WLG CRC 校验</span>
+                </span>
+            </a>
+        </div>
+    </div>
+
+</div>
+
 </body>
 </html>
