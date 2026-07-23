@@ -2,785 +2,566 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRC16-CCITT 文件校验工具</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>命令帧计算工具 | 协议: CA 85 + 命令字 + 数据长度 + 数据 + 异或取反校验 + 0C</title>
     <style>
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
-            background: linear-gradient(135deg, #1a2a3a 0%, #0d1b2a 100%);
-            color: #e0e0e0;
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 24px 16px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            min-height: 100vh;
         }
-        
-        .container {
-            max-width: 1000px;
+
+        .card {
+            max-width: 950px;
             width: 100%;
-            margin: 0 auto;
-            padding: 20px;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: all 0.2s;
         }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        .header {
+            background: #1e2a3e;
+            color: white;
+            padding: 1.5rem 2rem;
         }
-        
-        h1 {
-            color: #4dabf7;
-            margin-bottom: 10px;
-            font-size: 2.5rem;
+
+        .header h1 {
+            margin: 0 0 0.35rem 0;
+            font-weight: 600;
+            font-size: 1.7rem;
+            letter-spacing: -0.3px;
         }
-        
-        .subtitle {
-            color: #a5d8ff;
-            font-size: 1.2rem;
+
+        .header .sub {
+            margin: 0;
+            opacity: 0.8;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
         }
-        
+
         .content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            padding: 1.8rem 2rem 2rem 2rem;
         }
-        
-        @media (max-width: 768px) {
-            .content {
-                grid-template-columns: 1fr;
-            }
+
+        .field-group {
+            margin-bottom: 1.8rem;
         }
-        
-        .upload-section {
-            background: rgba(25, 35, 50, 0.8);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .drop-area {
-            border: 3px dashed #4dabf7;
-            border-radius: 10px;
-            padding: 40px 20px;
-            text-align: center;
-            transition: all 0.3s;
-            margin-bottom: 25px;
-            cursor: pointer;
-            background: rgba(77, 171, 247, 0.05);
-        }
-        
-        .drop-area:hover, .drop-area.highlight {
-            background: rgba(77, 171, 247, 0.1);
-            border-color: #74c0fc;
-        }
-        
-        .drop-area i {
-            font-size: 3rem;
-            color: #4dabf7;
-            margin-bottom: 15px;
-        }
-        
-        .drop-area h3 {
-            margin-bottom: 10px;
-            color: #e0e0e0;
-        }
-        
-        .drop-area p {
-            color: #a5d8ff;
+
+        label {
+            font-weight: 600;
+            color: #0f2b3d;
+            display: block;
+            margin-bottom: 0.5rem;
             font-size: 0.9rem;
         }
-        
-        .file-input {
-            display: none;
+
+        .label-desc {
+            font-size: 0.75rem;
+            font-weight: normal;
+            color: #4b6a7c;
+            margin-left: 8px;
         }
-        
-        .btn {
-            background: linear-gradient(to right, #4dabf7, #339af0);
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            background: #ffffff;
+            transition: 0.2s;
+            outline: none;
+            color: #0f172a;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 85px;
+        }
+
+        .help-text {
+            font-size: 0.7rem;
+            color: #5b6e8c;
+            margin-top: 6px;
+            margin-left: 8px;
+        }
+
+        .row-2cols {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .row-2cols > div {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        button {
+            background: #1e2a3e;
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 12px 24px;
             font-size: 1rem;
+            font-weight: 500;
+            border-radius: 40px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: 0.2s;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            margin: 10px 5px;
+            gap: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        
-        .btn:hover {
-            background: linear-gradient(to right, #339af0, #228be6);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+        button:hover {
+            background: #0f2b3d;
+            transform: translateY(-1px);
         }
-        
-        .btn i {
-            margin-right: 8px;
+
+        button:active {
+            transform: translateY(1px);
         }
-        
-        .btn-secondary {
-            background: linear-gradient(to right, #495057, #6c757d);
+
+        .btn-generate {
+            background: #2563eb;
+            margin-right: 12px;
         }
-        
-        .btn-secondary:hover {
-            background: linear-gradient(to right, #6c757d, #868e96);
+
+        .btn-generate:hover {
+            background: #1d4ed8;
         }
-        
-        .result-section {
-            background: rgba(25, 35, 50, 0.8);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+
+        .btn-copy {
+            background: #2c3e4e;
         }
-        
-        .result-section h2 {
-            color: #4dabf7;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+        .result-area {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 1.2rem 1.5rem;
+            margin-top: 1.2rem;
+            border: 1px solid #e2edf2;
         }
-        
-        .file-info {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .info-row:last-child {
-            margin-bottom: 0;
-            border-bottom: none;
-        }
-        
-        .info-label {
-            color: #a5d8ff;
+
+        .result-label {
             font-weight: 600;
-        }
-        
-        .info-value {
-            color: #e0e0e0;
-            font-family: monospace;
-        }
-        
-        .crc-result {
-            text-align: center;
-            padding: 25px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            margin-bottom: 25px;
-        }
-        
-        .crc-label {
-            font-size: 1.1rem;
-            color: #a5d8ff;
-            margin-bottom: 15px;
-        }
-        
-        .crc-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #4dabf7;
-            font-family: monospace;
-            letter-spacing: 2px;
-        }
-        
-        .algorithm-info {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 30px;
-        }
-        
-        .algorithm-info h3 {
-            color: #4dabf7;
-            margin-bottom: 15px;
-        }
-        
-        .code-snippet {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 8px;
-            padding: 15px;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            margin-top: 15px;
-            border-left: 3px solid #4dabf7;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #a5d8ff;
-            font-size: 0.9rem;
-        }
-        
-        .progress-container {
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .progress-bar {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(to right, #4dabf7, #339af0);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .progress-text {
-            text-align: center;
-            font-size: 0.9rem;
-            color: #a5d8ff;
-        }
-        
-        .error-message {
-            background: rgba(255, 0, 0, 0.1);
-            color: #ff6b6b;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border-left: 3px solid #ff6b6b;
-            display: none;
-        }
-        
-        .success-message {
-            background: rgba(46, 204, 113, 0.1);
-            color: #2ecc71;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border-left: 3px solid #2ecc71;
-            display: none;
-        }
-        
-        .format-options {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #3b6e8b;
+            margin-bottom: 0.8rem;
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
+            align-items: center;
+            gap: 8px;
         }
-        
-        .format-option {
-            background: rgba(77, 171, 247, 0.1);
-            border: 1px solid rgba(77, 171, 247, 0.3);
-            border-radius: 6px;
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-            flex: 1;
+
+        .frame-hex {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 1.1rem;
+            background: #0f172a;
+            color: #bbf0ff;
+            padding: 14px 18px;
+            border-radius: 20px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.5;
+            letter-spacing: 0.3px;
         }
-        
-        .format-option:hover {
-            background: rgba(77, 171, 247, 0.2);
-        }
-        
-        .format-option.active {
-            background: rgba(77, 171, 247, 0.3);
-            border-color: #4dabf7;
-        }
-        
-        .format-option h4 {
-            color: #a5d8ff;
-            margin-bottom: 5px;
-        }
-        
-        .format-option p {
+
+        .detail-info {
+            background: #eef3fa;
+            border-radius: 18px;
+            padding: 0.8rem 1rem;
             font-size: 0.8rem;
-            color: #a5d8ff;
+            margin-top: 1rem;
+            font-family: monospace;
+            color: #0f2b3a;
+        }
+
+        .error-message {
+            color: #dc2626;
+            background: #fee2e2;
+            border-radius: 24px;
+            padding: 8px 16px;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #7e8c9e;
+            border-top: 1px solid #e9eef3;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+        }
+
+        .badge {
+            background: #e6f0fa;
+            border-radius: 50px;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: normal;
+            color: #1e4a6e;
+        }
+
+        @media (max-width: 640px) {
+            .content {
+                padding: 1.2rem;
+            }
+            .frame-hex {
+                font-size: 0.85rem;
+            }
+            button {
+                padding: 10px 18px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-calculator"></i> CRC16-CCITT 文件校验工具</h1>
-            <p class="subtitle">拖放文件到下方区域，计算CRC16-CCITT校验值</p>
-        </header>
-        
-        <div class="content">
-            <div class="upload-section">
-                <h2><i class="fas fa-file-upload"></i> 上传文件</h2>
-                
-                <div class="drop-area" id="dropArea">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <h3>拖放文件到此处</h3>
-                    <p>支持 .bin, .hex 或其他二进制文件</p>
-                    <p>最大文件大小: 1GB</p>
-                </div>
-                
-                <div style="text-align: center;">
-                    <button class="btn" id="selectFileBtn">
-                        <i class="fas fa-folder-open"></i> 选择文件
-                    </button>
-                    <button class="btn btn-secondary" id="clearBtn">
-                        <i class="fas fa-trash-alt"></i> 清除
-                    </button>
-                </div>
-                
-                <input type="file" class="file-input" id="fileInput">
-                
-                <div class="progress-container" id="progressContainer">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <div class="progress-text" id="progressText">正在处理...</div>
-                </div>
-                
-                <div class="error-message" id="errorMessage"></div>
-                <div class="success-message" id="successMessage"></div>
-                
-                <div class="format-options">
-                    <div class="format-option active" id="formatHex">
-                        <h4>十六进制</h4>
-                        <p>0x1234</p>
-                    </div>
-                    <div class="format-option" id="formatDecimal">
-                        <h4>十进制</h4>
-                        <p>4660</p>
-                    </div>
-                    <div class="format-option" id="formatBinary">
-                        <h4>二进制</h4>
-                        <p>0001001000110100</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="result-section">
-                <h2><i class="fas fa-chart-bar"></i> 计算结果</h2>
-                
-                <div class="file-info">
-                    <div class="info-row">
-                        <span class="info-label">文件名:</span>
-                        <span class="info-value" id="fileName">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">文件大小:</span>
-                        <span class="info-value" id="fileSize">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">最后修改:</span>
-                        <span class="info-value" id="fileModified">-</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">计算时间:</span>
-                        <span class="info-value" id="calcTime">-</span>
-                    </div>
-                </div>
-                
-                <div class="crc-result">
-                    <div class="crc-label">CRC16-CCITT 校验值</div>
-                    <div class="crc-value" id="crcValue">0000</div>
-                    <div id="crcFormats">
-                        <div style="margin-top: 10px; font-family: monospace; color: #a5d8ff;">
-                            <div>十六进制: <span id="crcHex">0x0000</span></div>
-                            <div>十进制: <span id="crcDecimal">0</span></div>
-                            <div>二进制: <span id="crcBinary">0000000000000000</span></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="algorithm-info">
-                    <h3><i class="fas fa-code"></i> 算法说明</h3>
-                    <p>此工具使用与以下C函数相同的CRC16-CCITT算法：</p>
-                    <div class="code-snippet">
-// CRC16-CCITT 查找表 (多项式 0x1021)
-static const uint16 crc16tab[256] =
-{
-    0x0000,0x1021,0x2042,0x3063,0x4084,0x50a5,0x60c6,0x70e7,
-    0x8108,0x9129,0xa14a,0xb16b,0xc18c,0xd1ad,0xe1ce,0xf1ef,
-    0x1231,0x0210,0x3273,0x2252,0x52b5,0x4294,0x72f7,0x62d6,
-    0x9339,0x8318,0xb37b,0xa35a,0xd3bd,0xc39c,0xf3ff,0xe3de,
-    0x2462,0x3443,0x0420,0x1401,0x64e6,0x74c7,0x44a4,0x5485,
-    0xa56a,0xb54b,0x8528,0x9509,0xe5ee,0xf5cf,0xc5ac,0xd58d,
-    0x3653,0x2672,0x1611,0x0630,0x76d7,0x66f6,0x5695,0x46b4,
-    0xb75b,0xa77a,0x9719,0x8738,0xf7df,0xe7fe,0xd79d,0xc7bc,
-    0x48c4,0x58e5,0x6886,0x78a7,0x0840,0x1861,0x2802,0x3823,
-    0xc9cc,0xd9ed,0xe98e,0xf9af,0x8948,0x9969,0xa90a,0xb92b,
-    0x5af5,0x4ad4,0x7ab7,0x6a96,0x1a71,0x0a50,0x3a33,0x2a12,
-    0xdbfd,0xcbdc,0xfbbf,0xeb9e,0x9b79,0x8b58,0xbb3b,0xab1a,
-    0x6ca6,0x7c87,0x4ce4,0x5cc5,0x2c22,0x3c03,0x0c60,0x1c41,
-    0xedae,0xfd8f,0xcdec,0xddcd,0xad2a,0xbd0b,0x8d68,0x9d49,
-    0x7e97,0x6eb6,0x5ed5,0x4ef4,0x3e13,0x2e32,0x1e51,0x0e70,
-    0xff9f,0xefbe,0xdfdd,0xcffc,0xbf1b,0xaf3a,0x9f59,0x8f78,
-    0x9188,0x81a9,0xb1ca,0xa1eb,0xd10c,0xc12d,0xf14e,0xe16f,
-    0x1080,0x00a1,0x30c2,0x20e3,0x5004,0x4025,0x7046,0x6067,
-    0x83b9,0x9398,0xa3fb,0xb3da,0xc33d,0xd31c,0xe37f,0xf35e,
-    0x02b1,0x1290,0x22f3,0x32d2,0x4235,0x5214,0x6277,0x7256,
-    0xb5ea,0xa5cb,0x95a8,0x8589,0xf56e,0xe54f,0xd52c,0xc50d,
-    0x34e2,0x24c3,0x14a0,0x0481,0x7466,0x6447,0x5424,0x4405,
-    0xa7db,0xb7fa,0x8799,0x97b8,0xe75f,0xf77e,0xc71d,0xd73c,
-    0x26d3,0x36f2,0x0691,0x16b0,0x6657,0x7676,0x4615,0x5634,
-    0xd94c,0xc96d,0xf90e,0xe92f,0x99c8,0x89e9,0xb98a,0xa9ab,
-    0x5844,0x4865,0x7806,0x6827,0x18c0,0x08e1,0x3882,0x28a3,
-    0xcb7d,0xdb5c,0xeb3f,0xfb1e,0x8bf9,0x9bd8,0xabbb,0xbb9a,
-    0x4a75,0x5a54,0x6a37,0x7a16,0x0af1,0x1ad0,0x2ab3,0x3a92,
-    0xfd2e,0xed0f,0xdd6c,0xcd4d,0xbdaa,0xad8b,0x9de8,0x8dc9,
-    0x7c26,0x6c07,0x5c64,0x4c45,0x3ca2,0x2c83,0x1ce0,0x0cc1,
-    0xef1f,0xff3e,0xcf5d,0xdf7c,0xaf9b,0xbfba,0x8fd9,0x9ff8,
-    0x6e17,0x7e36,0x4e55,0x5e74,0x2e93,0x3eb2,0x0ed1,0x1ef0
-};
-
-uint16 om_crc16_ccitt(const uint8 *buf, uint16 len)
-{
-    uint16 counter=0, crc = 0;
-    uint8 *p = (uint8 *)buf;
-
-    for(counter = 0 ; counter < len ; counter++)
-    {
-        crc = (crc<<8) ^ crc16tab[((crc>>8)^ *(uint8 *)p++) & 0x00FF];
-    }
-    
-    return crc;
-}
-                    </div>
-                    <p style="margin-top: 15px;">多项式: 0x1021 (CCITT) | 初始值: 0x0000 | 结果异或值: 0x0000</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>CRC16-CCITT 文件校验工具 | 基于标准 CRC16-CCITT 算法实现</p>
-            <p>支持大文件处理，完全在浏览器中运行，无需上传到服务器</p>
-        </div>
+<div class="card">
+    <div class="header">
+        <h1>📡 命令帧生成器</h1>
+        <div class="sub">协议 · 固定头 0xCA 0x85 + 命令字 + 数据长度 + 数据 + 异或取反校验 + 尾 0x0C</div>
     </div>
+    <div class="content">
+        <div class="row-2cols">
+            <div class="field-group">
+                <label>🔹 命令字 (1字节) <span class="label-desc">十六进制, 例: A2</span></label>
+                <input type="text" id="cmdWord" placeholder="例如: A2" value="A2" maxlength="4" style="text-transform: uppercase">
+                <div class="help-text">支持 0xA2、A2、A (自动补零) 等格式</div>
+            </div>
+            <div class="field-group">
+                <label>📦 数据区 (可变) <span class="label-desc">十六进制字节，空格/逗号分隔</span></label>
+                <textarea id="dataArea" placeholder="例如: 1D 02 0D  或 1D,02,0D  或 1D020D">1D 02 0D</textarea>
+                <div class="help-text">支持连续字符串(1D020D)或带分隔符。最大长度 ≤ 255 字节</div>
+            </div>
+        </div>
 
-    <script>
-        // CRC16-CCITT 查找表 (多项式 0x1021) - 与C代码完全一致
-        const crc16tab = [
-            0x0000,0x1021,0x2042,0x3063,0x4084,0x50a5,0x60c6,0x70e7,
-            0x8108,0x9129,0xa14a,0xb16b,0xc18c,0xd1ad,0xe1ce,0xf1ef,
-            0x1231,0x0210,0x3273,0x2252,0x52b5,0x4294,0x72f7,0x62d6,
-            0x9339,0x8318,0xb37b,0xa35a,0xd3bd,0xc39c,0xf3ff,0xe3de,
-            0x2462,0x3443,0x0420,0x1401,0x64e6,0x74c7,0x44a4,0x5485,
-            0xa56a,0xb54b,0x8528,0x9509,0xe5ee,0xf5cf,0xc5ac,0xd58d,
-            0x3653,0x2672,0x1611,0x0630,0x76d7,0x66f6,0x5695,0x46b4,
-            0xb75b,0xa77a,0x9719,0x8738,0xf7df,0xe7fe,0xd79d,0xc7bc,
-            0x48c4,0x58e5,0x6886,0x78a7,0x0840,0x1861,0x2802,0x3823,
-            0xc9cc,0xd9ed,0xe98e,0xf9af,0x8948,0x9969,0xa90a,0xb92b,
-            0x5af5,0x4ad4,0x7ab7,0x6a96,0x1a71,0x0a50,0x3a33,0x2a12,
-            0xdbfd,0xcbdc,0xfbbf,0xeb9e,0x9b79,0x8b58,0xbb3b,0xab1a,
-            0x6ca6,0x7c87,0x4ce4,0x5cc5,0x2c22,0x3c03,0x0c60,0x1c41,
-            0xedae,0xfd8f,0xcdec,0xddcd,0xad2a,0xbd0b,0x8d68,0x9d49,
-            0x7e97,0x6eb6,0x5ed5,0x4ef4,0x3e13,0x2e32,0x1e51,0x0e70,
-            0xff9f,0xefbe,0xdfdd,0xcffc,0xbf1b,0xaf3a,0x9f59,0x8f78,
-            0x9188,0x81a9,0xb1ca,0xa1eb,0xd10c,0xc12d,0xf14e,0xe16f,
-            0x1080,0x00a1,0x30c2,0x20e3,0x5004,0x4025,0x7046,0x6067,
-            0x83b9,0x9398,0xa3fb,0xb3da,0xc33d,0xd31c,0xe37f,0xf35e,
-            0x02b1,0x1290,0x22f3,0x32d2,0x4235,0x5214,0x6277,0x7256,
-            0xb5ea,0xa5cb,0x95a8,0x8589,0xf56e,0xe54f,0xd52c,0xc50d,
-            0x34e2,0x24c3,0x14a0,0x0481,0x7466,0x6447,0x5424,0x4405,
-            0xa7db,0xb7fa,0x8799,0x97b8,0xe75f,0xf77e,0xc71d,0xd73c,
-            0x26d3,0x36f2,0x0691,0x16b0,0x6657,0x7676,0x4615,0x5634,
-            0xd94c,0xc96d,0xf90e,0xe92f,0x99c8,0x89e9,0xb98a,0xa9ab,
-            0x5844,0x4865,0x7806,0x6827,0x18c0,0x08e1,0x3882,0x28a3,
-            0xcb7d,0xdb5c,0xeb3f,0xfb1e,0x8bf9,0x9bd8,0xabbb,0xbb9a,
-            0x4a75,0x5a54,0x6a37,0x7a16,0x0af1,0x1ad0,0x2ab3,0x3a92,
-            0xfd2e,0xed0f,0xdd6c,0xcd4d,0xbdaa,0xad8b,0x9de8,0x8dc9,
-            0x7c26,0x6c07,0x5c64,0x4c45,0x3ca2,0x2c83,0x1ce0,0x0cc1,
-            0xef1f,0xff3e,0xcf5d,0xdf7c,0xaf9b,0xbfba,0x8fd9,0x9ff8,
-            0x6e17,0x7e36,0x4e55,0x5e74,0x2e93,0x3eb2,0x0ed1,0x1ef0
-        ];
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; margin-bottom: 6px;">
+            <div>
+                <button class="btn-generate" id="generateBtn">✨ 生成命令帧</button>
+                <button class="btn-copy" id="copyBtn">📋 复制结果</button>
+            </div>
+            <div class="badge">校验算法: 从命令头(CA)到数据区末字节依次异或 → 取反 → 得到校验码</div>
+        </div>
 
+        <div id="resultContainer" class="result-area" style="display: none;">
+            <div class="result-label">
+                <span>🔽 完整命令帧 (十六进制)</span>
+            </div>
+            <div id="frameHexDisplay" class="frame-hex"></div>
+            <div id="frameDetails" class="detail-info"></div>
+        </div>
+
+        <div id="errorMsg" class="error-message" style="display: none;"></div>
+
+        <footer>
+            ⚡ 固定头: CA 85 &nbsp;|&nbsp; 校验码 = ~(XOR[头...数据末]) & 0xFF &nbsp;|&nbsp; 固定尾: 0C
+        </footer>
+    </div>
+</div>
+
+<script>
+    (function() {
         // DOM 元素
-        const dropArea = document.getElementById('dropArea');
-        const fileInput = document.getElementById('fileInput');
-        const selectFileBtn = document.getElementById('selectFileBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        const errorMessage = document.getElementById('errorMessage');
-        const successMessage = document.getElementById('successMessage');
-        const fileName = document.getElementById('fileName');
-        const fileSize = document.getElementById('fileSize');
-        const fileModified = document.getElementById('fileModified');
-        const calcTime = document.getElementById('calcTime');
-        const crcValue = document.getElementById('crcValue');
-        const crcHex = document.getElementById('crcHex');
-        const crcDecimal = document.getElementById('crcDecimal');
-        const crcBinary = document.getElementById('crcBinary');
-        const formatHex = document.getElementById('formatHex');
-        const formatDecimal = document.getElementById('formatDecimal');
-        const formatBinary = document.getElementById('formatBinary');
+        const cmdInput = document.getElementById('cmdWord');
+        const dataInput = document.getElementById('dataArea');
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const frameHexDisplay = document.getElementById('frameHexDisplay');
+        const frameDetails = document.getElementById('frameDetails');
+        const errorMsgDiv = document.getElementById('errorMsg');
 
-        // 当前选中的文件
-        let currentFile = null;
-        let currentCrc = 0;
+        // 固定协议常量
+        const HEADER = [0xCA, 0x85];      // 2字节命令头
+        const TAIL = 0x0C;               // 命令尾
 
-        // 初始化事件监听器
-        function initEventListeners() {
-            // 点击选择文件按钮
-            selectFileBtn.addEventListener('click', () => {
-                fileInput.click();
-            });
-            
-            // 文件选择变化
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleFile(e.target.files[0]);
-                }
-            });
-            
-            // 清除按钮
-            clearBtn.addEventListener('click', clearFile);
-            
-            // 拖放事件
-            dropArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropArea.classList.add('highlight');
-            });
-            
-            dropArea.addEventListener('dragleave', () => {
-                dropArea.classList.remove('highlight');
-            });
-            
-            dropArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropArea.classList.remove('highlight');
-                
-                if (e.dataTransfer.files.length > 0) {
-                    handleFile(e.dataTransfer.files[0]);
-                }
-            });
-            
-            // 格式选项点击事件
-            formatHex.addEventListener('click', () => {
-                setActiveFormat('hex');
-            });
-            
-            formatDecimal.addEventListener('click', () => {
-                setActiveFormat('decimal');
-            });
-            
-            formatBinary.addEventListener('click', () => {
-                setActiveFormat('binary');
-            });
+        // 辅助函数：隐藏错误，显示错误消息
+        function showError(message) {
+            errorMsgDiv.textContent = message;
+            errorMsgDiv.style.display = 'block';
+            resultContainer.style.display = 'none';
         }
 
-        // 设置活动格式
-        function setActiveFormat(format) {
-            // 移除所有活动类
-            formatHex.classList.remove('active');
-            formatDecimal.classList.remove('active');
-            formatBinary.classList.remove('active');
+        function hideError() {
+            errorMsgDiv.style.display = 'none';
+        }
+
+        // 将用户输入的十六进制字符串智能解析为字节数组 (支持: "A2", "A2 03 1D", "1D020D", "0x1D,0x02"等)
+        function parseHexBytes(inputStr) {
+            if (!inputStr || inputStr.trim() === '') return [];
+            let raw = inputStr.trim();
+            // 移除所有 "0x" 或 "0X" 前缀 (独立)
+            raw = raw.replace(/0x/gi, '');
+            // 使用正则匹配所有合法的十六进制片段 (1~2个字符: [0-9A-Fa-f]{1,2})
+            // 常见分隔符会被自动忽略，因为只提取字母数字组合
+            const matches = raw.match(/[0-9A-Fa-f]{1,2}/g);
+            if (!matches) return [];
             
-            // 添加活动类到选中的格式
-            if (format === 'hex') {
-                formatHex.classList.add('active');
-                crcValue.textContent = currentCrc.toString(16).toUpperCase().padStart(4, '0');
-            } else if (format === 'decimal') {
-                formatDecimal.classList.add('active');
-                crcValue.textContent = currentCrc.toString();
-            } else if (format === 'binary') {
-                formatBinary.classList.add('active');
-                crcValue.textContent = currentCrc.toString(2).padStart(16, '0');
+            const bytes = [];
+            for (let token of matches) {
+                // 若长度为1，自动补0（例如 "A" => "0A" , "F" => "0F"）
+                let hexStr = token.length === 1 ? '0' + token : token;
+                if (hexStr.length !== 2) {
+                    // 理论上re只会匹配1-2个字符, 但安全兜底
+                    continue;
+                }
+                const byteVal = parseInt(hexStr, 16);
+                if (isNaN(byteVal)) continue;
+                if (byteVal < 0 || byteVal > 255) continue;
+                bytes.push(byteVal);
             }
+            return bytes;
         }
 
-        // 处理文件
-        function handleFile(file) {
-            // 重置状态
-            clearMessages();
+        // 解析命令字 (1字节)
+        function parseCommandWord(cmdRaw) {
+            if (!cmdRaw || cmdRaw.trim() === '') return null;
+            let clean = cmdRaw.trim();
+            // 移除 0x 前缀
+            clean = clean.replace(/^0x/i, '');
+            // 匹配十六进制串 (最多2个字符)
+            const match = clean.match(/^[0-9A-Fa-f]{1,2}$/);
+            if (!match) return null;
+            let hexStr = match[0];
+            if (hexStr.length === 1) hexStr = '0' + hexStr;
+            const val = parseInt(hexStr, 16);
+            if (isNaN(val) || val < 0 || val > 255) return null;
+            return val;
+        }
+
+        // 构建完整帧, 返回 { success: true, frameBytes: [], xorValue: number, checksum: number, dataLen: number, cmdByte: number }
+        // 或 { success: false, errorMsg: string }
+        function buildFrame(cmdByte, dataBytes) {
+            // 数据长度不能超过255
+            if (dataBytes.length > 255) {
+                return { success: false, errorMsg: `数据长度超出限制: ${dataBytes.length} 字节 (最大允许255字节)` };
+            }
+            const dataLen = dataBytes.length;
+            // 构建 从命令头开始到数据区结束的字节数组（用于校验，不含校验码和尾）
+            const preBytes = [
+                ...HEADER,      // 0xCA, 0x85
+                cmdByte,
+                dataLen,
+                ...dataBytes
+            ];
+            // 依次异或 (从第一个字节到 preBytes 最后一个字节)
+            let xorAcc = 0;
+            for (let b of preBytes) {
+                xorAcc ^= b;
+            }
+            // 取反 并 保留低8位
+            let checksum = (~xorAcc) & 0xFF;
+            // 最终完整帧: preBytes + 校验码 + 尾
+            const finalFrame = [...preBytes, checksum, TAIL];
+            return {
+                success: true,
+                frameBytes: finalFrame,
+                xorValue: xorAcc,
+                checksum: checksum,
+                dataLen: dataLen,
+                cmdByte: cmdByte,
+                preBytesLength: preBytes.length
+            };
+        }
+
+        // 将字节数组转为空格分隔的大写十六进制字符串
+        function bytesToHexString(bytes) {
+            return bytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+        }
+
+        // 生成详细信息文本
+        function getDetailsText(cmdByte, dataBytes, xorValue, checksum, frameBytes) {
+            const dataLen = dataBytes.length;
+            const headerStr = bytesToHexString(HEADER);
+            const cmdStr = cmdByte.toString(16).padStart(2,'0').toUpperCase();
+            const lenStr = dataLen.toString(16).padStart(2,'0').toUpperCase();
+            const dataStr = dataBytes.length ? bytesToHexString(dataBytes) : '(空)';
+            const xorHex = xorValue.toString(16).padStart(2,'0').toUpperCase();
+            const checksumHex = checksum.toString(16).padStart(2,'0').toUpperCase();
+            const tailStr = TAIL.toString(16).padStart(2,'0').toUpperCase();
             
-            // 检查文件大小（限制为1GB）
-            if (file.size > 1024 * 1024 * 1024) {
-                showError('文件太大，请选择小于1GB的文件');
+            // 构建校验计算描述
+            let xorCalcItems = `CA 85 ${cmdStr} ${lenStr}`;
+            if (dataBytes.length) {
+                xorCalcItems += ` ${dataStr}`;
+            }
+            return `
+                📐 字段解析<br>
+                • 命令头: ${headerStr}<br>
+                • 命令字: 0x${cmdStr}<br>
+                • 数据长度: ${dataLen} (0x${lenStr})<br>
+                • 数据区: ${dataStr}<br>
+                • 校验码计算: 异或序列 [ ${xorCalcItems} ] = 0x${xorHex} → 取反(~) & 0xFF = 0x${checksumHex}<br>
+                • 命令尾: 0x${tailStr}<br>
+                ✅ 完整帧长度: ${frameBytes.length} 字节
+            `;
+        }
+
+        // 主渲染函数
+        function generateFrame() {
+            hideError();
+            
+            // 1. 获取并解析命令字
+            const cmdRaw = cmdInput.value;
+            const cmdByte = parseCommandWord(cmdRaw);
+            if (cmdByte === null) {
+                showError('❌ 命令字无效：请输入有效的1字节十六进制数 (例: A2 , 0xA2 , 0A)');
                 return;
             }
             
-            currentFile = file;
-            updateFileInfo(file);
-            
-            // 显示进度容器
-            progressContainer.style.display = 'block';
-            progressFill.style.width = '0%';
-            progressText.textContent = '正在读取文件...';
-            
-            // 读取文件并计算CRC
-            calculateFileCRC(file);
-        }
-
-        // 计算文件的CRC16
-        function calculateFileCRC(file) {
-            const startTime = performance.now();
-            
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const arrayBuffer = e.target.result;
-                const uint8Array = new Uint8Array(arrayBuffer);
-                
-                progressText.textContent = '正在计算CRC...';
-                progressFill.style.width = '50%';
-                
-                // 使用setTimeout避免阻塞UI
-                setTimeout(() => {
-                    const crc = om_crc16_ccitt(uint8Array);
-                    const endTime = performance.now();
-                    
-                    currentCrc = crc;
-                    updateCRCResult(crc, endTime - startTime);
-                    
-                    progressFill.style.width = '100%';
-                    progressText.textContent = '计算完成！';
-                    
-                    // 隐藏进度条
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-                    }, 1000);
-                    
-                    showSuccess('CRC计算完成！');
-                }, 100);
-            };
-            
-            reader.onerror = function() {
-                showError('读取文件时发生错误');
-                progressContainer.style.display = 'none';
-            };
-            
-            reader.readAsArrayBuffer(file);
-        }
-
-        // 实现与C函数相同的CRC16算法
-        function om_crc16_ccitt(uint8Array) {
-            let crc = 0;
-            let len = uint8Array.length;
-            
-            for (let counter = 0; counter < len; counter++) {
-                crc = (crc << 8) ^ crc16tab[((crc >> 8) ^ uint8Array[counter]) & 0x00FF];
-                // 确保结果为16位
-                crc &= 0xFFFF;
+            // 2. 获取数据区文本并解析为字节数组
+            const dataRaw = dataInput.value;
+            let dataBytes = parseHexBytes(dataRaw);
+            // 特别情况: 如果输入框为空, 长度为0允许
+            if (dataRaw.trim() !== '' && dataBytes.length === 0) {
+                showError('⚠️ 数据区无法解析为有效的十六进制字节。请使用十六进制格式，例如: 1D 02 0D 或 1D020D');
+                return;
             }
             
-            return crc;
+            // 3. 构建帧
+            const buildResult = buildFrame(cmdByte, dataBytes);
+            if (!buildResult.success) {
+                showError(buildResult.errorMsg);
+                return;
+            }
+            
+            const { frameBytes, xorValue, checksum, dataLen, cmdByte: finalCmd } = buildResult;
+            
+            // 4. 显示结果
+            const hexString = bytesToHexString(frameBytes);
+            frameHexDisplay.textContent = hexString;
+            
+            const detailsHtml = getDetailsText(finalCmd, dataBytes, xorValue, checksum, frameBytes);
+            frameDetails.innerHTML = detailsHtml;
+            
+            resultContainer.style.display = 'block';
+            
+            // 可选：给复制按钮存储当前帧字符串
+            window.__lastFrameHex = hexString;
         }
-
-        // 更新文件信息显示
-        function updateFileInfo(file) {
-            fileName.textContent = file.name;
-            fileSize.textContent = formatFileSize(file.size);
-            fileModified.textContent = new Date(file.lastModified).toLocaleString();
-            calcTime.textContent = '-';
+        
+        // 复制结果
+        function copyFrame() {
+            if (!resultContainer.style.display === 'none' || !window.__lastFrameHex) {
+                // 如果当前没有显示结果，尝试重新生成一次
+                if (!window.__lastFrameHex) {
+                    // 尝试调用生成，但不要重复显示错误时影响复制
+                    // 如果有错误就不复制
+                    const cmdRaw = cmdInput.value;
+                    const cmdByte = parseCommandWord(cmdRaw);
+                    if (cmdByte === null) {
+                        showError('无法复制：命令字无效');
+                        return;
+                    }
+                    const dataRaw = dataInput.value;
+                    let dataBytes = parseHexBytes(dataRaw);
+                    if (dataRaw.trim() !== '' && dataBytes.length === 0) {
+                        showError('无法复制：数据区解析失败');
+                        return;
+                    }
+                    const buildResult = buildFrame(cmdByte, dataBytes);
+                    if (!buildResult.success) {
+                        showError(buildResult.errorMsg);
+                        return;
+                    }
+                    const hexStr = bytesToHexString(buildResult.frameBytes);
+                    window.__lastFrameHex = hexStr;
+                    // 同时确保界面显示
+                    if (resultContainer.style.display === 'none') {
+                        frameHexDisplay.textContent = hexStr;
+                        const detailsHtml = getDetailsText(buildResult.cmdByte, dataBytes, buildResult.xorValue, buildResult.checksum, buildResult.frameBytes);
+                        frameDetails.innerHTML = detailsHtml;
+                        resultContainer.style.display = 'block';
+                        hideError();
+                    }
+                }
+            }
+            
+            if (!window.__lastFrameHex) {
+                showError('没有可复制的帧，请先生成命令帧');
+                return;
+            }
+            
+            navigator.clipboard.writeText(window.__lastFrameHex).then(() => {
+                // 临时提示
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✅ 已复制!';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 1500);
+                hideError(); // 清除任何错误提示
+            }).catch(err => {
+                showError('复制失败，手动选择复制');
+            });
         }
-
-        // 更新CRC结果显示
-        function updateCRCResult(crc, timeMs) {
-            // 更新计算时间
-            calcTime.textContent = timeMs.toFixed(2) + ' ms';
-            
-            // 更新CRC值（默认显示十六进制）
-            crcValue.textContent = crc.toString(16).toUpperCase().padStart(4, '0');
-            
-            // 更新所有格式的显示
-            crcHex.textContent = '0x' + crc.toString(16).toUpperCase().padStart(4, '0');
-            crcDecimal.textContent = crc.toString();
-            crcBinary.textContent = crc.toString(2).padStart(16, '0');
-            
-            // 设置活动格式为十六进制
-            setActiveFormat('hex');
-        }
-
-        // 清除文件
-        function clearFile() {
-            fileInput.value = '';
-            currentFile = null;
-            currentCrc = 0;
-            
-            // 重置显示
-            fileName.textContent = '-';
-            fileSize.textContent = '-';
-            fileModified.textContent = '-';
-            calcTime.textContent = '-';
-            crcValue.textContent = '0000';
-            crcHex.textContent = '0x0000';
-            crcDecimal.textContent = '0';
-            crcBinary.textContent = '0000000000000000';
-            
-            // 重置格式选项
-            setActiveFormat('hex');
-            
-            // 隐藏进度和消息
-            progressContainer.style.display = 'none';
-            clearMessages();
-            
-            showSuccess('已清除文件');
-        }
-
-        // 显示错误消息
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-            successMessage.style.display = 'none';
-        }
-
-        // 显示成功消息
-        function showSuccess(message) {
-            successMessage.textContent = message;
-            successMessage.style.display = 'block';
-            errorMessage.style.display = 'none';
-            
-            // 3秒后自动隐藏成功消息
-            setTimeout(() => {
-                successMessage.style.display = 'none';
-            }, 3000);
-        }
-
-        // 清除消息
-        function clearMessages() {
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-        }
-
-        // 格式化文件大小
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            initEventListeners();
-            
-            // 设置默认活动格式
-            setActiveFormat('hex');
+        
+        // 事件绑定
+        generateBtn.addEventListener('click', () => {
+            generateFrame();
+            // 每次生成后存储帧到变量, 但是复制时基于生成的显示区域重新拿
+            const displayedHex = frameHexDisplay.textContent;
+            if (displayedHex && resultContainer.style.display === 'block') {
+                window.__lastFrameHex = displayedHex;
+            }
         });
-    </script>
+        
+        copyBtn.addEventListener('click', () => {
+            // 如果当前有显示结果，直接用显示的内容
+            if (resultContainer.style.display === 'block' && frameHexDisplay.textContent.trim() !== '') {
+                window.__lastFrameHex = frameHexDisplay.textContent;
+            }
+            copyFrame();
+        });
+        
+        // 初始化默认示例帧 (自动生成显示)
+        // 首次加载时自动生成一次示例帧, 让用户看到效果
+        function initDefault() {
+            // 预设示例: 命令字 A2 , 数据 1D 02 0D (与文档完全一致)
+            cmdInput.value = 'A2';
+            dataInput.value = '1D 02 0D';
+            generateFrame();
+        }
+        
+        initDefault();
+        
+        // 附加: 为输入框添加回车快捷生成 (可选)
+        const inputs = [cmdInput, dataInput];
+        inputs.forEach(inp => {
+            inp.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    generateBtn.click();
+                }
+            });
+        });
+        
+        // 当用户点击生成后自动同步剪贴板缓存
+        window.addEventListener('load', () => {
+            // 如果生成失败就不覆盖
+        });
+    })();
+</script>
 </body>
 </html>
