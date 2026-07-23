@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- <meta charset="UTF-8"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII  . Hex  . 十进制 互转工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        header {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .converter {
+            display: flex;
+            padding: 30px;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .converter {
+                flex-direction: column;
+                gap: 30px;
+            }
+        }
+        
+        .input-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            color: #1a2a6c;
+            font-weight: 600;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: transform 0.2s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .copy-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+        
+        .input-area {
+            width: 100%;
+            height: 250px;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            resize: vertical;
+            transition: border-color 0.3s;
+            background-color: #f9f9f9;
+            line-height: 1.6;
+        }
+        
+        .input-area:focus {
+            outline: none;
+            border-color: #1a2a6c;
+            box-shadow: 0 0 0 2px rgba(26, 42, 108, 0.2);
+        }
+        
+        .input-area[readonly] {
+            background-color: #f0f0f0;
+            cursor: default;
+        }
+        
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+            min-height: 25px;
+            font-weight: 500;
+        }
+        
+        .info {
+            background-color: #e3f2fd;
+            border-left: 4px solid #1a2a6c;
+            padding: 20px;
+            margin: 0 30px 30px;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .info h3 {
+            color: #1a2a6c;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .info ul {
+            padding-left: 20px;
+        }
+        
+        .info li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .info code {
+            background-color: #d1e7ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(30deg);
+        }
+        
+        /* 夜间模式样式 */
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f1b3a, #2d0f0f, #0f1b3a);
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .container {
+            background-color: rgba(30, 30, 40, 0.95);
+        }
+        
+        body.dark-mode header {
+            background: linear-gradient(to right, #0f1b3a, #4a1515);
+        }
+        
+        body.dark-mode h2 {
+            color: #8ab4f8;
+        }
+        
+        body.dark-mode .input-area {
+            background-color: #1e1e2e;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .input-area:focus {
+            border-color: #8ab4f8;
+            box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.2);
+        }
+        
+        body.dark-mode .input-area[readonly] {
+            background-color: #2a2a3a;
+        }
+        
+        body.dark-mode .info {
+            background-color: #1e2a3a;
+            border-left-color: #8ab4f8;
+        }
+        
+        body.dark-mode .info h3 {
+            color: #8ab4f8;
+        }
+        
+        body.dark-mode .info code {
+            background-color: #2a3a4a;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .copy-btn {
+            background: linear-gradient(to right, #0f1b3a, #4a1515);
+        }
+        
+        .icon-container {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-exchange-alt"></i> ASCII / Hex / 十进制 互转工具</h1>
+            <p class="subtitle">在任意列输入或修改，其余列自动转换 —— ASCII - HEX - 十进制</p>
+            <button class="theme-toggle" title="切换主题">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+        
+        <div class="converter">
+            <!-- ASCII 列 -->
+            <div class="input-section">
+                <div class="section-title">
+                    <h2><i class="fas fa-font"></i> ASCII</h2>
+                    <button class="copy-btn" data-target="ascii">
+                        <span class="icon-container"><i class="far fa-copy"></i></span>
+                        复制
+                    </button>
+                </div>
+                <textarea id="ascii-input" class="input-area" placeholder="在此输入 ASCII 文本...">Hello World! This is an ASCII to Hex converter.</textarea>
+                <div id="ascii-error" class="error"></div>
+            </div>
+            
+            <!-- HEX 列 -->
+            <div class="input-section">
+                <div class="section-title">
+                    <h2><i class="fas fa-hashtag"></i> HEX</h2>
+                    <button class="copy-btn" data-target="hex">
+                        <span class="icon-container"><i class="far fa-copy"></i></span>
+                        复制
+                    </button>
+                </div>
+                <textarea id="hex-input" class="input-area" placeholder="在此输入 HEX 值（每两个字符表示一个字节，空格可选）...">48656c6c6f20576f726c6421205468697320697320616e20415343494920746f2048657820636f6e7665727465722e</textarea>
+                <div id="hex-error" class="error"></div>
+            </div>
+            
+            <!-- 十进制列（新增） -->
+            <div class="input-section">
+                <div class="section-title">
+                    <h2><i class="fas fa-hashtag"></i> 十进制</h2>
+                    <button class="copy-btn" data-target="dec">
+                        <span class="icon-container"><i class="far fa-copy"></i></span>
+                        复制
+                    </button>
+                </div>
+                <textarea id="dec-output" class="input-area" readonly placeholder="十进制 ASCII 码（仅显示）..."></textarea>
+                <div id="dec-error" class="error"></div>
+            </div>
+        </div>
+        
+        <div class="info">
+            <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+            <ul>
+                <li><strong>ASCII → HEX / 十进制</strong>：在左侧输入ASCII文本，右侧自动显示对应的Hex和十进制值</li>
+                <li><strong>HEX → ASCII / 十进制</strong>：在中间输入Hex值（每两个字符表示一个字节，空格可选），左右两侧自动转换</li>
+                <li>Hex输入必须是有效的十六进制字符（0-9, A-F, a-f），且长度为偶数</li>
+                <li>示例：ASCII <code>Hello</code> → HEX <code>48 65 6C 6C 6F</code> → 十进制 <code>72 101 108 108 111</code></li>
+                <li>点击每列上方的“复制”按钮可快速复制对应内容</li>
+            </ul>
+        </div>
+    </div>
+    
+    <footer>
+        <p>? 2023 ASCII/Hex/十进制 转换工具 | 实时双向三列联动</p>
+    </footer>
+
+    <script>
+        // DOM元素
+        const asciiInput = document.getElementById('ascii-input');
+        const hexInput = document.getElementById('hex-input');
+        const decOutput = document.getElementById('dec-output');
+        const asciiError = document.getElementById('ascii-error');
+        const hexError = document.getElementById('hex-error');
+        const decError = document.getElementById('dec-error');
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        const themeToggle = document.querySelector('.theme-toggle');
+        const themeIcon = themeToggle.querySelector('i');
+        
+        let updating = false;
+        
+        // ASCII → Hex（带空格分隔）
+        function asciiToHex(ascii) {
+            if (!ascii) return '';
+            let hex = '';
+            for (let i = 0; i < ascii.length; i++) {
+                const charCode = ascii.charCodeAt(i);
+                hex += charCode.toString(16).padStart(2, '0').toUpperCase();
+            }
+            return hex.match(/.{1,2}/g).join(' ');
+        }
+        
+        // ASCII → 十进制（空格分隔）
+        function asciiToDec(ascii) {
+            if (!ascii) return '';
+            const codes = [];
+            for (let i = 0; i < ascii.length; i++) {
+                codes.push(ascii.charCodeAt(i));
+            }
+            return codes.join(' ');
+        }
+        
+        // Hex → ASCII
+        function hexToAscii(hex) {
+            const cleanedHex = hex.replace(/\s/g, '');
+            if (cleanedHex.length % 2 !== 0) {
+                throw new Error('Hex长度必须为偶数');
+            }
+            if (!/^[0-9A-Fa-f]+$/.test(cleanedHex)) {
+                throw new Error('包含非十六进制字符');
+            }
+            let ascii = '';
+            for (let i = 0; i < cleanedHex.length; i += 2) {
+                const hexByte = cleanedHex.substr(i, 2);
+                const charCode = parseInt(hexByte, 16);
+                // 保留可打印字符和换行，其余显示为 '.'
+                if ((charCode >= 32 && charCode <= 126) || charCode === 10) {
+                    ascii += String.fromCharCode(charCode);
+                } else {
+                    ascii += '.';
+                }
+            }
+            return ascii;
+        }
+        
+        // 更新所有输出（基于ASCII）
+        function updateAllFromAscii(ascii) {
+            try {
+                hexInput.value = asciiToHex(ascii);
+                decOutput.value = asciiToDec(ascii);
+                asciiError.textContent = '';
+                hexError.textContent = '';
+                decError.textContent = '';
+            } catch (e) {
+                // 正常情况下不会出错
+            }
+        }
+        
+        // ASCII输入事件
+        asciiInput.addEventListener('input', () => {
+            if (updating) return;
+            updating = true;
+            updateAllFromAscii(asciiInput.value);
+            updating = false;
+        });
+        
+        // HEX输入事件
+        hexInput.addEventListener('input', () => {
+            if (updating) return;
+            updating = true;
+            hexError.textContent = '';
+            asciiError.textContent = '';
+            decError.textContent = '';
+            
+            try {
+                const ascii = hexToAscii(hexInput.value);
+                asciiInput.value = ascii;
+                decOutput.value = asciiToDec(ascii);
+            } catch (error) {
+                // 转换失败时，只显示错误，不清除已有值
+                hexError.textContent = error.message;
+            }
+            
+            updating = false;
+        });
+        
+        // 复制按钮功能
+        copyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const target = button.getAttribute('data-target');
+                let textarea;
+                if (target === 'ascii') textarea = asciiInput;
+                else if (target === 'hex') textarea = hexInput;
+                else if (target === 'dec') textarea = decOutput;
+                else return;
+                
+                textarea.select();
+                document.execCommand('copy');
+                
+                const icon = button.querySelector('i');
+                const originalClass = icon.className;
+                icon.className = 'fas fa-check';
+                setTimeout(() => {
+                    icon.className = originalClass;
+                }, 1500);
+            });
+        });
+        
+        // 主题切换
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                themeIcon.className = 'fas fa-sun';
+                themeToggle.title = '切换到亮色模式';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeToggle.title = '切换到暗色模式';
+            }
+        });
+        
+        // 初始化：触发一次ASCII输入，填充默认值
+        asciiInput.dispatchEvent(new Event('input'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>唯乐高上位机升级文件合成工具</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #1a2a6c, #2d6187, #28abb9);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+    
+    header {
+      background: linear-gradient(90deg, #1a2a6c, #28abb9);
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    
+    .content {
+      padding: 25px;
+    }
+    
+    .section {
+      margin-bottom: 25px;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .section-title {
+      font-size: 1.3rem;
+      color: #1a2a6c;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #28abb9;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #1a2a6c;
+    }
+    
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus, select:focus {
+      border-color: #28abb9;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(40, 171, 185, 0.2);
+    }
+    
+    button {
+      background: linear-gradient(90deg, #1a2a6c, #28abb9);
+      color: white;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      padding: 15px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .info-box {
+      background-color: #e9f7fe;
+      border-left: 4px solid #28abb9;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    
+    .info-item {
+      margin-bottom: 8px;
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: #1a2a6c;
+    }
+    
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #1a2a6c;
+      color: white;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      display: none;
+    }
+    
+    .link-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .link {
+      color: #1a2a6c;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .link:hover {
+      text-decoration: underline;
+    }
+    
+    .example {
+      background-color: #fffde7;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-size: 0.9rem;
+    }
+    
+    .example-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1a2a6c;
+    }
+    
+    .highlight {
+      background-color: #ffeb3b;
+      padding: 0 4px;
+      border-radius: 3px;
+      color: #1a2a6c;
+    }
+    
+    .data-preview {
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      overflow-x: auto;
+      margin: 15px 0;
+      display: none;
+    }
+    
+    .hex-line {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 5px;
+    }
+    
+    .hex-byte {
+      margin-right: 8px;
+    }
+    
+    .hex-header {
+      color: #3498db;
+      font-weight: bold;
+      margin-right: 5px;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        width: 95%;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .section-title {
+        font-size: 1.1rem;
+      }
+      
+      input, select, button {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>唯乐高上位机升级文件合成工具</h1>
+      <p class="subtitle">生成符合规范的升级文件</p>
+    </header>
+    
+    <div class="content">
+      <div class="section">
+        <h2 class="section-title">文件上传</h2>
+        <div class="form-group">
+          <label for="fileInput">上传BIN文件</label>
+          <input type="file" id="fileInput" accept=".bin" />
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2 class="section-title">包头信息配置</h2>
+        
+        <!-- 添加车型选择 -->
+        <div class="form-group">
+          <label for="vehicleModel">选择车型</label>
+          <select id="vehicleModel">
+            <option value="S21">S21</option>
+            <option value="M01">M01</option>
+            <option value="R01">R01</option>
+            <option value="F03">F03</option>
+            <option value="M11">M11</option>
+            <option value="M12">M12</option>
+            <option value="U01">U01</option>
+            <option value="S10">S10</option>
+            <option value="BLE">BLE</option>
+          </select>
+        </div>
+        
+        <!-- 版本号输入 -->
+        <div class="form-group">
+          <label for="versionInput">版本号 (例如: V037)</label>
+          <input type="text" id="versionInput" placeholder="输入版本号，例如 V037" value="V037" />
+        </div>
+        
+        <div class="info-box">
+          <div class="info-item">
+            <span class="info-label">包头格式：</span>
+            SWDP-DT-XXX-0-VXXXHWDP-DT-XXX-0-VXXXBTDTDPXXXXXXXVXXX
+          </div>
+          <div class="info-item">
+            <span class="info-label">说明：</span>
+            XXX表示仪表软件版本
+          </div>
+          <div class="info-item">
+            <span class="info-label">字节处理：</span>
+            需要在字节长度前后补零 (前补3个00，后补1个00)
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="textInput">包头数据</label>
+          <input type="text" id="textInput" placeholder="输入包头数据" />
+        </div>
+        
+        <div class="form-group">
+          <label for="textFileName">生成文件名</label>
+          <input type="text" id="textFileName" placeholder="输入生成的文件名" />
+        </div>
+        
+        <div class="example">
+          <div class="example-title">示例：</div>
+          <p>包头数据：<span id="exampleHeader" class="highlight">SWDP-DT-S21-1-V015HWDP-DT-S21-1-V004BTDTDP0C01V03V005</span></p>
+          <p>生成的文件名称：<span id="exampleFileName" class="highlight">SWDP-DT-S21-1-V037.bin</span></p>
+          <p>实际包头数据：<span id="exampleHex" class="highlight">53 57 44 50 2D 44 54 2D 53 32 31 2D 31 2D 56 30 31 35 48 57 44 50 2D 44 54 2D 53 32 31 2D 31 2D 56 30 30 34 42 54 44 54 44 50 30 43 30 31 56 30 33 56 30 30 35</span></p>
+        </div>
+        
+        <div class="form-group">
+          <label for="saveDirBtn">保存目录</label>
+          <button type="button" id="saveDirBtn">选择保存目录</button>
+          <span id="saveDirStatus" style="margin-left:10px; color:#666;">未选择</span>
+        </div>
+        
+        <button id="processBtn">处理文件</button>
+      </div>
+      
+      <div class="section">
+        <h2 class="section-title">处理结果</h2>
+        <div id="result" class="result"></div>
+        <div id="dataPreview" class="data-preview">
+          <div class="hex-line">
+            <span class="hex-header">包头数据:</span>
+            <span id="headerPreview"></span>
+          </div>
+          <div class="hex-line">
+            <span class="hex-header">长度信息:</span>
+            <span id="lengthPreview"></span>
+          </div>
+          <div class="hex-line">
+            <span class="hex-header">文件内容:</span>
+            <span id="contentPreview"></span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="link-container">
+        <a href="https://velotric.feishu.cn/file/boxcnY3ktmfCUWvKe4CA3O8xTLc" class="link" target="_blank">唯乐高软件编码规则链接</a>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const fileInput = document.getElementById('fileInput');
+      const vehicleModel = document.getElementById('vehicleModel');
+      const versionInput = document.getElementById('versionInput');
+      const textInput = document.getElementById('textInput');
+      const textFileName = document.getElementById('textFileName');
+      const processBtn = document.getElementById('processBtn');
+      const saveDirBtn = document.getElementById('saveDirBtn');
+      const saveDirStatus = document.getElementById('saveDirStatus');
+      const resultDiv = document.getElementById('result');
+      const dataPreview = document.getElementById('dataPreview');
+      const headerPreview = document.getElementById('headerPreview');
+      const lengthPreview = document.getElementById('lengthPreview');
+      const contentPreview = document.getElementById('contentPreview');
+      const exampleHeader = document.getElementById('exampleHeader');
+      const exampleFileName = document.getElementById('exampleFileName');
+      const exampleHex = document.getElementById('exampleHex');
+      
+      //TODO: 车型配置
+      const vehicleConfig = {
+        'S21': {
+          suffix: 'HWDP-DT-S21-1-V004BTDTDP0C01V03V005'
+        },
+        'M01': {
+          suffix: 'HWDP-DT-M01-1-V003BTDTDP0M01V03V003'
+        },
+        'R01': {
+          suffix: 'HWDP-DT-R01-1-V003BTDTDP0M01V03V003'
+        },
+        'F03': {
+          suffix: 'HWDP-DT-F03-1-V003BTDTDP0M01V03V003'
+        },
+        'M11': {
+          suffix: 'HWDP-DT-M11-1-V003BTDTDP0M01V03V003'
+        },
+        'M12': {
+          suffix: 'HWDP-DT-M12-1-V003BTDTDP0M01V03V003'
+        },
+        'U01': {
+          suffix: 'HWDP-DT-U01-1-V003BTDTDP0M01V03V003'
+        },
+        'S10': {
+          suffix: 'HWDP-DT-S10-0-V002BTDTDP0001001V002'
+        },
+        'BLE': {
+          suffix: 'HWDP-DT-M01-1-V003BTDTDP0M01V03V003'
+        }
+      };
+      
+      // 设置初始值
+      updateVehicleConfig();
+      
+      // 车型变更事件
+      vehicleModel.addEventListener('change', function() {
+        updateVehicleConfig();
+      });
+      
+      // 版本号变更事件
+      versionInput.addEventListener('input', function() {
+        updateVehicleConfig();
+      });
+      
+      // 保存目录选择事件
+      saveDirBtn.addEventListener('click', async function() {
+        if ('showDirectoryPicker' in window) {
+          try {
+            const handle = await window.showDirectoryPicker();
+            // 存储目录句柄，以便后续使用
+            window.selectedDirectoryHandle = handle;
+            saveDirStatus.textContent = handle.name;
+            saveDirStatus.style.color = '#28abb9';
+          } catch (err) {
+            // 用户取消选择
+            console.log('目录选择取消:', err);
+          }
+        } else {
+          alert('您的浏览器不支持目录选择功能，将使用默认下载方式。');
+        }
+      });
+      
+      // 更新车型配置
+      function updateVehicleConfig() {
+        const selectedModel = vehicleModel.value;
+        let version = versionInput.value.trim();
+        const config = vehicleConfig[selectedModel];
+        
+        if (!version) {
+          // 如果版本号为空，保持当前值不变
+          return;
+        }
+        
+        // 如果是BLE型号且版本号为默认值V037，则改为V001
+        if (selectedModel === 'BLE' && version === 'V037') {
+          version = 'V001';
+          versionInput.value = version;
+        }
+        
+        let header, filename;
+        
+        if (selectedModel === 'BLE') {
+          // BLE型号使用SWBE前缀和C01车型代码
+          header = `SWBE-DT-C01-1-${version}${config.suffix}`;
+          filename = `SWBE-DT-C01-1-${version}.bin`;
+        } else {
+          // 其他车型使用SWDP前缀
+          header = `SWDP-DT-${selectedModel}-1-${version}${config.suffix}`;
+          filename = `SWDP-DT-${selectedModel}-1-${version}.bin`;
+        }
+        
+        // 更新对应字段
+        textInput.value = header;
+        textFileName.value = filename;
+        
+        // 更新示例
+        exampleHeader.textContent = header;
+        exampleFileName.textContent = filename;
+        
+        // 更新十六进制示例
+        const hexData = stringToHex(header);
+        exampleHex.textContent = formatHex(hexData);
+      }
+      
+      // 处理文件
+      processBtn.addEventListener('click', processFile);
+      
+      async function processFile() {
+        const file = fileInput.files[0];
+        const additionalData = textInput.value;
+        const textFileNameData = textFileName.value;
+        
+        // 验证输入
+        if (!file) {
+          showResult('请先选择一个BIN文件', 'error');
+          return;
+        }
+        
+        if (!additionalData) {
+          showResult('请输入包头数据', 'error');
+          return;
+        }
+        
+        if (!textFileNameData) {
+          showResult('请输入生成的文件名', 'error');
+          return;
+        }
+        
+        const reader = new FileReader();
+        
+        reader.onload = async function(event) {
+          try {
+            const arrayBuffer = event.target.result;
+            const uint8Array = new Uint8Array(arrayBuffer);
+            const fileContent = event.target.result;
+            const fileLength = fileContent.byteLength;
+            
+            // 计算文件长度信息
+            let paddedLength;
+            if (fileLength % 60 === 0) {
+              paddedLength = fileLength;
+            } else {
+              paddedLength = Math.ceil(fileLength / 60) * 60;
+            }
+            
+            const hexResult = paddedLength.toString(16).toUpperCase().padStart(6, '0');
+            const rehexResult = fileLength.toString(16).toUpperCase().padStart(6, '0');
+            
+            // 显示文件信息
+            showResult(`原始文件长度: ${fileLength} bytes (0x${rehexResult})<br>对齐后长度: ${paddedLength} bytes (0x${hexResult})`);
+            
+            // 将包头数据转换成十六进制
+            const additionalHexData = stringToHex(additionalData);
+            const headerBytes = hexToBytes(additionalHexData);
+            
+            // 预览包头数据
+            previewData(headerBytes, headerPreview);
+            
+            // 创建长度信息字节数组 (前后补零)
+            const lenBytes = new Uint8Array(7);
+            // 前3个字节为0
+            lenBytes[0] = 0x00;
+            lenBytes[1] = 0x00;
+            lenBytes[2] = 0x00;
+            // 文件长度（3字节大端）
+            lenBytes[3] = (paddedLength >> 16) & 0xFF;
+            lenBytes[4] = (paddedLength >> 8) & 0xFF;
+            lenBytes[5] = paddedLength & 0xFF;
+            // 最后1个字节为0
+            lenBytes[6] = 0x00;
+            
+            // 预览长度信息
+            previewData(lenBytes, lengthPreview);
+            
+            // 预览文件内容 (只显示前16字节)
+            const previewContent = uint8Array.slice(0, 16);
+            previewData(previewContent, contentPreview);
+            contentPreview.innerHTML += ' ...';
+            
+            // 显示数据预览
+            dataPreview.style.display = 'block';
+            
+            // 创建新的Uint8Array：包头长度 + 7字节长度信息 + 文件内容长度
+            const newData = new Uint8Array(headerBytes.length + 7 + uint8Array.length);
+            
+            // 填充包头数据
+            newData.set(headerBytes, 0);
+            
+            // 填充长度信息
+            newData.set(lenBytes, headerBytes.length);
+            
+            // 填充文件内容
+            newData.set(uint8Array, headerBytes.length + 7);
+            
+            // 创建文件Blob
+            const blob = new Blob([newData], {type: 'application/octet-stream'});
+            const filename = textFileNameData.endsWith('.bin') ? textFileNameData : textFileNameData + '.bin';
+            
+            // 尝试使用已选择的目录保存文件
+            if (window.selectedDirectoryHandle) {
+              try {
+                const fileHandle = await saveFileToDirectory(blob, filename, newData.length);
+                showResult(`文件处理成功！已保存到目录: <strong>${fileHandle.name}</strong><br>总大小: ${newData.length} bytes`, 'success');
+                return;
+              } catch (err) {
+                console.error('保存到目录失败:', err);
+                // 继续尝试其他方式
+              }
+            }
+            
+            // 尝试使用现代文件系统API保存文件
+            if ('showSaveFilePicker' in window) {
+              try {
+                const handle = await window.showSaveFilePicker({
+                  suggestedName: filename,
+                  types: [{
+                    description: 'BIN文件',
+                    accept: {'application/octet-stream': ['.bin']}
+                  }]
+                });
+                const writable = await handle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+                showResult(`文件处理成功！已保存到: <strong>${handle.name}</strong><br>总大小: ${newData.length} bytes`, 'success');
+              } catch (err) {
+                // 用户取消或错误，回退到下载方式
+                fallbackDownload(blob, filename, newData.length);
+              }
+            } else {
+              // 不支持showSaveFilePicker，使用下载方式
+              fallbackDownload(blob, filename, newData.length);
+            }
+          } catch (error) {
+            showResult(`处理文件时出错: ${error.message}`, 'error');
+            console.error(error);
+          }
+        };
+        
+        reader.onerror = function() {
+          showResult('读取文件时出错', 'error');
+        };
+        
+        reader.readAsArrayBuffer(file);
+      }
+      
+      // 回退下载函数
+      function fallbackDownload(blob, filename, totalSize) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        
+        // 清理
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        showResult(`文件处理成功！已生成: <strong>${filename}</strong><br>总大小: ${totalSize} bytes`, 'success');
+      }
+      
+      // 保存文件到已选择的目录
+      async function saveFileToDirectory(blob, filename, totalSize) {
+        if (!window.selectedDirectoryHandle) {
+          throw new Error('未选择目录');
+        }
+        try {
+          const fileHandle = await window.selectedDirectoryHandle.getFileHandle(filename, { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          return fileHandle;
+        } catch (err) {
+          throw err;
+        }
+      }
+      
+      // 将字符串转换成十六进制表示
+      function stringToHex(str) {
+        let hex = '';
+        for (let i = 0; i < str.length; i++) {
+          hex += str.charCodeAt(i).toString(16).padStart(2, '0');
+        }
+        return hex;
+      }
+      
+      // 将十六进制字符串转换为字节数组
+      function hexToBytes(hex) {
+        const bytes = [];
+        for (let i = 0; i < hex.length; i += 2) {
+          bytes.push(parseInt(hex.substring(i, i + 2), 16));
+        }
+        return new Uint8Array(bytes);
+      }
+      
+      // 格式化十六进制显示
+      function formatHex(hex) {
+        let formatted = '';
+        for (let i = 0; i < hex.length; i += 2) {
+          formatted += hex.substring(i, i + 2).toUpperCase() + ' ';
+        }
+        return formatted.trim();
+      }
+      
+      // 预览数据为十六进制格式
+      function previewData(data, element) {
+        let html = '';
+        for (let i = 0; i < data.length; i++) {
+          html += `<span class="hex-byte">${data[i].toString(16).toUpperCase().padStart(2, '0')}</span>`;
+          // 每16字节换行
+          if ((i + 1) % 16 === 0 && i !== data.length - 1) {
+            html += '<br>';
+          }
+        }
+        element.innerHTML = html;
+      }
+      
+      function showResult(message, type = 'info') {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = message;
+        
+        // 根据类型设置背景色
+        if (type === 'error') {
+          resultDiv.style.backgroundColor = '#ff6b6b';
+        } else if (type === 'success') {
+          resultDiv.style.backgroundColor = '#51cf66';
+        } else {
+          resultDiv.style.backgroundColor = '#1a2a6c';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

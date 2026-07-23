@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>命令帧计算工具 | 协议: CA 85 + 命令字 + 数据长度 + 数据 + 异或取反校验 + 0C</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 24px 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            max-width: 950px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .header {
+            background: #1e2a3e;
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+
+        .header h1 {
+            margin: 0 0 0.35rem 0;
+            font-weight: 600;
+            font-size: 1.7rem;
+            letter-spacing: -0.3px;
+        }
+
+        .header .sub {
+            margin: 0;
+            opacity: 0.8;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .content {
+            padding: 1.8rem 2rem 2rem 2rem;
+        }
+
+        .field-group {
+            margin-bottom: 1.8rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: #0f2b3d;
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .label-desc {
+            font-size: 0.75rem;
+            font-weight: normal;
+            color: #4b6a7c;
+            margin-left: 8px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            background: #ffffff;
+            transition: 0.2s;
+            outline: none;
+            color: #0f172a;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 85px;
+        }
+
+        .help-text {
+            font-size: 0.7rem;
+            color: #5b6e8c;
+            margin-top: 6px;
+            margin-left: 8px;
+        }
+
+        .row-2cols {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .row-2cols > div {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        button {
+            background: #1e2a3e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        button:hover {
+            background: #0f2b3d;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-generate {
+            background: #2563eb;
+            margin-right: 12px;
+        }
+
+        .btn-generate:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-copy {
+            background: #2c3e4e;
+        }
+
+        .result-area {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 1.2rem 1.5rem;
+            margin-top: 1.2rem;
+            border: 1px solid #e2edf2;
+        }
+
+        .result-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #3b6e8b;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .frame-hex {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 1.1rem;
+            background: #0f172a;
+            color: #bbf0ff;
+            padding: 14px 18px;
+            border-radius: 20px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.5;
+            letter-spacing: 0.3px;
+        }
+
+        .detail-info {
+            background: #eef3fa;
+            border-radius: 18px;
+            padding: 0.8rem 1rem;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            color: #0f2b3a;
+        }
+
+        .error-message {
+            color: #dc2626;
+            background: #fee2e2;
+            border-radius: 24px;
+            padding: 8px 16px;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #7e8c9e;
+            border-top: 1px solid #e9eef3;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+        }
+
+        .badge {
+            background: #e6f0fa;
+            border-radius: 50px;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: normal;
+            color: #1e4a6e;
+        }
+
+        @media (max-width: 640px) {
+            .content {
+                padding: 1.2rem;
+            }
+            .frame-hex {
+                font-size: 0.85rem;
+            }
+            button {
+                padding: 10px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="header">
+        <h1>📡 命令帧生成器</h1>
+        <div class="sub">协议 · 固定头 0xCA 0x85 + 命令字 + 数据长度 + 数据 + 异或取反校验 + 尾 0x0C</div>
+    </div>
+    <div class="content">
+        <div class="row-2cols">
+            <div class="field-group">
+                <label>🔹 命令字 (1字节) <span class="label-desc">十六进制, 例: A2</span></label>
+                <input type="text" id="cmdWord" placeholder="例如: A2" value="A2" maxlength="4" style="text-transform: uppercase">
+                <div class="help-text">支持 0xA2、A2、A (自动补零) 等格式</div>
+            </div>
+            <div class="field-group">
+                <label>📦 数据区 (可变) <span class="label-desc">十六进制字节，空格/逗号分隔</span></label>
+                <textarea id="dataArea" placeholder="例如: 1D 02 0D  或 1D,02,0D  或 1D020D">1D 02 0D</textarea>
+                <div class="help-text">支持连续字符串(1D020D)或带分隔符。最大长度 ≤ 255 字节</div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; margin-bottom: 6px;">
+            <div>
+                <button class="btn-generate" id="generateBtn">✨ 生成命令帧</button>
+                <button class="btn-copy" id="copyBtn">📋 复制结果</button>
+            </div>
+            <div class="badge">校验算法: 从命令头(CA)到数据区末字节依次异或 → 取反 → 得到校验码</div>
+        </div>
+
+        <div id="resultContainer" class="result-area" style="display: none;">
+            <div class="result-label">
+                <span>🔽 完整命令帧 (十六进制)</span>
+            </div>
+            <div id="frameHexDisplay" class="frame-hex"></div>
+            <div id="frameDetails" class="detail-info"></div>
+        </div>
+
+        <div id="errorMsg" class="error-message" style="display: none;"></div>
+
+        <footer>
+            ⚡ 固定头: CA 85 &nbsp;|&nbsp; 校验码 = ~(XOR[头...数据末]) & 0xFF &nbsp;|&nbsp; 固定尾: 0C
+        </footer>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM 元素
+        const cmdInput = document.getElementById('cmdWord');
+        const dataInput = document.getElementById('dataArea');
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const frameHexDisplay = document.getElementById('frameHexDisplay');
+        const frameDetails = document.getElementById('frameDetails');
+        const errorMsgDiv = document.getElementById('errorMsg');
+
+        // 固定协议常量
+        const HEADER = [0xCA, 0x85];      // 2字节命令头
+        const TAIL = 0x0C;               // 命令尾
+
+        // 辅助函数：隐藏错误，显示错误消息
+        function showError(message) {
+            errorMsgDiv.textContent = message;
+            errorMsgDiv.style.display = 'block';
+            resultContainer.style.display = 'none';
+        }
+
+        function hideError() {
+            errorMsgDiv.style.display = 'none';
+        }
+
+        // 将用户输入的十六进制字符串智能解析为字节数组 (支持: "A2", "A2 03 1D", "1D020D", "0x1D,0x02"等)
+        function parseHexBytes(inputStr) {
+            if (!inputStr || inputStr.trim() === '') return [];
+            let raw = inputStr.trim();
+            // 移除所有 "0x" 或 "0X" 前缀 (独立)
+            raw = raw.replace(/0x/gi, '');
+            // 使用正则匹配所有合法的十六进制片段 (1~2个字符: [0-9A-Fa-f]{1,2})
+            // 常见分隔符会被自动忽略，因为只提取字母数字组合
+            const matches = raw.match(/[0-9A-Fa-f]{1,2}/g);
+            if (!matches) return [];
+            
+            const bytes = [];
+            for (let token of matches) {
+                // 若长度为1，自动补0（例如 "A" => "0A" , "F" => "0F"）
+                let hexStr = token.length === 1 ? '0' + token : token;
+                if (hexStr.length !== 2) {
+                    // 理论上re只会匹配1-2个字符, 但安全兜底
+                    continue;
+                }
+                const byteVal = parseInt(hexStr, 16);
+                if (isNaN(byteVal)) continue;
+                if (byteVal < 0 || byteVal > 255) continue;
+                bytes.push(byteVal);
+            }
+            return bytes;
+        }
+
+        // 解析命令字 (1字节)
+        function parseCommandWord(cmdRaw) {
+            if (!cmdRaw || cmdRaw.trim() === '') return null;
+            let clean = cmdRaw.trim();
+            // 移除 0x 前缀
+            clean = clean.replace(/^0x/i, '');
+            // 匹配十六进制串 (最多2个字符)
+            const match = clean.match(/^[0-9A-Fa-f]{1,2}$/);
+            if (!match) return null;
+            let hexStr = match[0];
+            if (hexStr.length === 1) hexStr = '0' + hexStr;
+            const val = parseInt(hexStr, 16);
+            if (isNaN(val) || val < 0 || val > 255) return null;
+            return val;
+        }
+
+        // 构建完整帧, 返回 { success: true, frameBytes: [], xorValue: number, checksum: number, dataLen: number, cmdByte: number }
+        // 或 { success: false, errorMsg: string }
+        function buildFrame(cmdByte, dataBytes) {
+            // 数据长度不能超过255
+            if (dataBytes.length > 255) {
+                return { success: false, errorMsg: `数据长度超出限制: ${dataBytes.length} 字节 (最大允许255字节)` };
+            }
+            const dataLen = dataBytes.length;
+            // 构建 从命令头开始到数据区结束的字节数组（用于校验，不含校验码和尾）
+            const preBytes = [
+                ...HEADER,      // 0xCA, 0x85
+                cmdByte,
+                dataLen,
+                ...dataBytes
+            ];
+            // 依次异或 (从第一个字节到 preBytes 最后一个字节)
+            let xorAcc = 0;
+            for (let b of preBytes) {
+                xorAcc ^= b;
+            }
+            // 取反 并 保留低8位
+            let checksum = (~xorAcc) & 0xFF;
+            // 最终完整帧: preBytes + 校验码 + 尾
+            const finalFrame = [...preBytes, checksum, TAIL];
+            return {
+                success: true,
+                frameBytes: finalFrame,
+                xorValue: xorAcc,
+                checksum: checksum,
+                dataLen: dataLen,
+                cmdByte: cmdByte,
+                preBytesLength: preBytes.length
+            };
+        }
+
+        // 将字节数组转为空格分隔的大写十六进制字符串
+        function bytesToHexString(bytes) {
+            return bytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+        }
+
+        // 生成详细信息文本
+        function getDetailsText(cmdByte, dataBytes, xorValue, checksum, frameBytes) {
+            const dataLen = dataBytes.length;
+            const headerStr = bytesToHexString(HEADER);
+            const cmdStr = cmdByte.toString(16).padStart(2,'0').toUpperCase();
+            const lenStr = dataLen.toString(16).padStart(2,'0').toUpperCase();
+            const dataStr = dataBytes.length ? bytesToHexString(dataBytes) : '(空)';
+            const xorHex = xorValue.toString(16).padStart(2,'0').toUpperCase();
+            const checksumHex = checksum.toString(16).padStart(2,'0').toUpperCase();
+            const tailStr = TAIL.toString(16).padStart(2,'0').toUpperCase();
+            
+            // 构建校验计算描述
+            let xorCalcItems = `CA 85 ${cmdStr} ${lenStr}`;
+            if (dataBytes.length) {
+                xorCalcItems += ` ${dataStr}`;
+            }
+            return `
+                📐 字段解析<br>
+                • 命令头: ${headerStr}<br>
+                • 命令字: 0x${cmdStr}<br>
+                • 数据长度: ${dataLen} (0x${lenStr})<br>
+                • 数据区: ${dataStr}<br>
+                • 校验码计算: 异或序列 [ ${xorCalcItems} ] = 0x${xorHex} → 取反(~) & 0xFF = 0x${checksumHex}<br>
+                • 命令尾: 0x${tailStr}<br>
+                ✅ 完整帧长度: ${frameBytes.length} 字节
+            `;
+        }
+
+        // 主渲染函数
+        function generateFrame() {
+            hideError();
+            
+            // 1. 获取并解析命令字
+            const cmdRaw = cmdInput.value;
+            const cmdByte = parseCommandWord(cmdRaw);
+            if (cmdByte === null) {
+                showError('❌ 命令字无效：请输入有效的1字节十六进制数 (例: A2 , 0xA2 , 0A)');
+                return;
+            }
+            
+            // 2. 获取数据区文本并解析为字节数组
+            const dataRaw = dataInput.value;
+            let dataBytes = parseHexBytes(dataRaw);
+            // 特别情况: 如果输入框为空, 长度为0允许
+            if (dataRaw.trim() !== '' && dataBytes.length === 0) {
+                showError('⚠️ 数据区无法解析为有效的十六进制字节。请使用十六进制格式，例如: 1D 02 0D 或 1D020D');
+                return;
+            }
+            
+            // 3. 构建帧
+            const buildResult = buildFrame(cmdByte, dataBytes);
+            if (!buildResult.success) {
+                showError(buildResult.errorMsg);
+                return;
+            }
+            
+            const { frameBytes, xorValue, checksum, dataLen, cmdByte: finalCmd } = buildResult;
+            
+            // 4. 显示结果
+            const hexString = bytesToHexString(frameBytes);
+            frameHexDisplay.textContent = hexString;
+            
+            const detailsHtml = getDetailsText(finalCmd, dataBytes, xorValue, checksum, frameBytes);
+            frameDetails.innerHTML = detailsHtml;
+            
+            resultContainer.style.display = 'block';
+            
+            // 可选：给复制按钮存储当前帧字符串
+            window.__lastFrameHex = hexString;
+        }
+        
+        // 复制结果
+        function copyFrame() {
+            if (!resultContainer.style.display === 'none' || !window.__lastFrameHex) {
+                // 如果当前没有显示结果，尝试重新生成一次
+                if (!window.__lastFrameHex) {
+                    // 尝试调用生成，但不要重复显示错误时影响复制
+                    // 如果有错误就不复制
+                    const cmdRaw = cmdInput.value;
+                    const cmdByte = parseCommandWord(cmdRaw);
+                    if (cmdByte === null) {
+                        showError('无法复制：命令字无效');
+                        return;
+                    }
+                    const dataRaw = dataInput.value;
+                    let dataBytes = parseHexBytes(dataRaw);
+                    if (dataRaw.trim() !== '' && dataBytes.length === 0) {
+                        showError('无法复制：数据区解析失败');
+                        return;
+                    }
+                    const buildResult = buildFrame(cmdByte, dataBytes);
+                    if (!buildResult.success) {
+                        showError(buildResult.errorMsg);
+                        return;
+                    }
+                    const hexStr = bytesToHexString(buildResult.frameBytes);
+                    window.__lastFrameHex = hexStr;
+                    // 同时确保界面显示
+                    if (resultContainer.style.display === 'none') {
+                        frameHexDisplay.textContent = hexStr;
+                        const detailsHtml = getDetailsText(buildResult.cmdByte, dataBytes, buildResult.xorValue, buildResult.checksum, buildResult.frameBytes);
+                        frameDetails.innerHTML = detailsHtml;
+                        resultContainer.style.display = 'block';
+                        hideError();
+                    }
+                }
+            }
+            
+            if (!window.__lastFrameHex) {
+                showError('没有可复制的帧，请先生成命令帧');
+                return;
+            }
+            
+            navigator.clipboard.writeText(window.__lastFrameHex).then(() => {
+                // 临时提示
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✅ 已复制!';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 1500);
+                hideError(); // 清除任何错误提示
+            }).catch(err => {
+                showError('复制失败，手动选择复制');
+            });
+        }
+        
+        // 事件绑定
+        generateBtn.addEventListener('click', () => {
+            generateFrame();
+            // 每次生成后存储帧到变量, 但是复制时基于生成的显示区域重新拿
+            const displayedHex = frameHexDisplay.textContent;
+            if (displayedHex && resultContainer.style.display === 'block') {
+                window.__lastFrameHex = displayedHex;
+            }
+        });
+        
+        copyBtn.addEventListener('click', () => {
+            // 如果当前有显示结果，直接用显示的内容
+            if (resultContainer.style.display === 'block' && frameHexDisplay.textContent.trim() !== '') {
+                window.__lastFrameHex = frameHexDisplay.textContent;
+            }
+            copyFrame();
+        });
+        
+        // 初始化默认示例帧 (自动生成显示)
+        // 首次加载时自动生成一次示例帧, 让用户看到效果
+        function initDefault() {
+            // 预设示例: 命令字 A2 , 数据 1D 02 0D (与文档完全一致)
+            cmdInput.value = 'A2';
+            dataInput.value = '1D 02 0D';
+            generateFrame();
+        }
+        
+        initDefault();
+        
+        // 附加: 为输入框添加回车快捷生成 (可选)
+        const inputs = [cmdInput, dataInput];
+        inputs.forEach(inp => {
+            inp.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    generateBtn.click();
+                }
+            });
+        });
+        
+        // 当用户点击生成后自动同步剪贴板缓存
+        window.addEventListener('load', () => {
+            // 如果生成失败就不覆盖
+        });
+    })();
+</script>
+</body>
+</html>
