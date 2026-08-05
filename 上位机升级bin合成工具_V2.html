@@ -13,7 +13,7 @@
     }
     
     body {
-      background: linear-gradient(135deg, #1a2a6c, #2d6187, #28abb9);
+      background: linear-gradient(135deg, rgb(204, 204, 204), rgb(204, 204, 204), rgb(204, 204, 204));
       color: #333;
       min-height: 100vh;
       padding: 20px;
@@ -232,9 +232,13 @@
     <div class="content">
       <div class="section">
         <h2 class="section-title">文件上传</h2>
-        <div class="form-group">
-          <label for="fileInput">上传BIN文件</label>
+        <div class="form-group" id="appFileGroup">
+          <label for="fileInput">上传APP BIN文件</label>
           <input type="file" id="fileInput" accept=".bin" />
+        </div>
+        <div class="form-group" id="uiFileGroup" style="display:none;">
+          <label for="uiFileInput">上传UI BIN文件</label>
+          <input type="file" id="uiFileInput" accept=".bin" />
         </div>
       </div>
       
@@ -243,24 +247,54 @@
         
         <!-- 添加车型选择 -->
         <div class="form-group">
-          <label for="vehicleModel">选择车型</label>
+          <label for="vehicleModel">选择车型-VBIKE-代号</label>
           <select id="vehicleModel">
-            <option value="S21">S21</option>
+            <option value="S21">S21-VBIKE006</option>
             <option value="M01">M01</option>
             <option value="R01">R01</option>
-            <option value="F03">F03</option>
-            <option value="M11">M11</option>
-            <option value="M12">M12</option>
-            <option value="U01">U01</option>
+            <option value="F03">F03-VBIKE008-F2</option>
+            <option value="M11">M11-VBIKE009-N3</option>
+            <option value="M12">M12-VBIKE019-N3X</option>
+            <option value="U01">U01-VBIKE011-P2</option>
             <option value="S10">S10</option>
-            <option value="BLE">BLE</option>
+            <option value="C31">C31-VBIKE002</option>
+            <option value="B02">B02-VBIKE012-B2</option>
+            <option value="M13">M13-VBIKE013-N3H</option>
+            <option value="C02">C02-VBIKE014-C1A</option>
+            <option value="B03">B03-VBIKE016-BPF</option>
+            <option value="BLE">BLE蓝牙模块</option>
           </select>
         </div>
         
-        <!-- 版本号输入 -->
+        <!-- 软件类型选择 -->
         <div class="form-group">
-          <label for="versionInput">版本号 (例如: V037)</label>
-          <input type="text" id="versionInput" placeholder="输入版本号，例如 V037" value="V037" />
+          <label for="softType">软件类型</label>
+          <div style="display: flex; gap: 20px; align-items: center; padding: 12px 0;">
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: normal; margin: 0;">
+              <input type="radio" name="softType" value="SWDP" checked id="softTypeSWDP" style="width: auto; margin: 0;" />
+              SWDP (软件)
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: normal; margin: 0;">
+              <input type="radio" name="softType" value="SWUI" id="softTypeSWUI" style="width: auto; margin: 0;" />
+              SWUI (UI)
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: normal; margin: 0;">
+              <input type="radio" name="softType" value="BOTH" id="softTypeBOTH" style="width: auto; margin: 0;" />
+              SWDP+SWUI (软件+UI)
+            </label>
+          </div>
+        </div>
+
+        <!-- 软件版本号输入 -->
+        <div class="form-group">
+          <label for="versionInput">软件版本号 (例如: V037)</label>
+          <input type="text" id="versionInput" placeholder="输入软件版本号，例如 V037" value="V037" />
+        </div>
+
+        <!-- UI版本号输入（软件+UI模式时显示） -->
+        <div class="form-group" id="uiVersionGroup" style="display:none;">
+          <label for="uiVersionInput">UI版本号 (例如: V007)</label>
+          <input type="text" id="uiVersionInput" placeholder="输入UI版本号，例如 V007" value="V007" />
         </div>
         
         <div class="info-box">
@@ -279,7 +313,7 @@
         </div>
         
         <div class="form-group">
-          <label for="textInput">包头数据</label>
+          <label for="textInput">包头数据 <span id="headerLengthHint" style="font-weight:normal; font-size:0.85rem; color:#ff6b6b; display:none;">长度错误！需56字节</span></label>
           <input type="text" id="textInput" placeholder="输入包头数据" />
         </div>
         
@@ -332,7 +366,13 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const fileInput = document.getElementById('fileInput');
+      const uiFileInput = document.getElementById('uiFileInput');
+      const uiFileGroup = document.getElementById('uiFileGroup');
+      const appFileGroup = document.getElementById('appFileGroup');
+      const uiVersionGroup = document.getElementById('uiVersionGroup');
+      const uiVersionInput = document.getElementById('uiVersionInput');
       const vehicleModel = document.getElementById('vehicleModel');
+      const softTypeRadios = document.querySelectorAll('input[name="softType"]');
       const versionInput = document.getElementById('versionInput');
       const textInput = document.getElementById('textInput');
       const textFileName = document.getElementById('textFileName');
@@ -351,33 +391,71 @@
       //TODO: 车型配置
       const vehicleConfig = {
         'S21': {
-          suffix: 'HWDP-DT-S21-1-V004BTDTDP0C01V03V005'
+          suffix: 'HWDP-DT-S21-1-V004BTDTDP0C01V03V005',
+          bothSuffix: 'BTDTDP0C01V03V005'
         },
         'M01': {
-          suffix: 'HWDP-DT-M01-1-V003BTDTDP0M01V03V003'
+          suffix: 'HWDP-DT-M01-1-V003BTDTDP0M01V03V003',
+          bothSuffix: 'BTDTDP0M01V03V003'
         },
         'R01': {
-          suffix: 'HWDP-DT-R01-1-V003BTDTDP0M01V03V003'
+          suffix: 'HWDP-DT-R01-1-V003BTDTDP0M01V03V003',
+          bothSuffix: 'BTDTDP0M01V03V003'
         },
         'F03': {
-          suffix: 'HWDP-DT-F03-1-V003BTDTDP0M01V03V003'
+          suffix: 'HWDP-DT-F03-1-V003BTDTDP0F03V03V003',
+          bothSuffix: 'BTDTDP0F03V03V003'
         },
         'M11': {
-          suffix: 'HWDP-DT-M11-1-V003BTDTDP0M01V03V003'
+          suffix: 'HWDP-DT-M11-1-V003BTDTDP0M11V03V003',
+          bothSuffix: 'BTDTDP0M11V03V003'
         },
         'M12': {
-          suffix: 'HWDP-DT-M12-1-V003BTDTDP0M01V03V003'
+          suffix: 'HWDP-DT-M12-1-V003BTDTDP0M12V03V003',
+          bothSuffix: 'BTDTDP0M12V03V003'
         },
         'U01': {
-          suffix: 'HWDP-DT-U01-1-V003BTDTDP0M01V03V003'
+          suffix: 'HWDP-DT-U01-1-V003BTDTDP0U01V03V003',
+          bothSuffix: 'BTDTDP0U01V03V003'
         },
         'S10': {
-          suffix: 'HWDP-DT-S10-0-V002BTDTDP0001001V002'
+          suffix: 'HWDP-DT-S10-0-V002BTDTDP0001001V002',
+          bothSuffix: 'BTDTDP0001001V002'
+        },
+        'C31': {
+          suffix: 'HWDP-DT-C31-1-V003BTDTDP0C31V03V003',
+          bothSuffix: 'BTDTDP0C31V03V003'
+        },
+        'B02': {
+          suffix: 'HWDP-DT-B02-1-V003BTDTDP0B02V03V003',
+          bothSuffix: 'BTDTDP0B02V03V003'
+        },
+        'M13': {
+          suffix: 'HWDP-DT-M13-1-V003BTDTDP0M13V03V003',
+          bothSuffix: 'BTDTDP0M13V03V003'
+        },
+        'C02': {
+          suffix: 'HWDP-DT-C02-1-V003BTDTDP0C02V03V003',
+          bothSuffix: 'BTDTDP0C02V03V003'
+        },
+        'B03': {
+          suffix: 'HWDP-DT-B03-1-V003BTDTDP0B03V03V003',
+          bothSuffix: 'BTDTDP0B03V03V003'
         },
         'BLE': {
-          suffix: 'HWDP-DT-M01-1-V003BTDTDP0M01V03V003'
+          suffix: 'HWDP-DT-M01-1-V003BTDTDP0M01V03V003',
+          bothSuffix: 'BTDTDP0M01V03V003'
         }
       };
+      
+      // 包头数据固定长度（所有模式均为53字节）
+      // SWDP: SWDP-DT-S21-1-V037HWDP-DT-S21-1-V004BTDTDP0C01V03V005 = 53
+      // SWUI: SWUI-DT-S21-1-V007HWDP-DT-S21-1-V004BTDTDP0C01V03V005 = 53
+      // BOTH: SWDP-DT-S21-1-V037SWUI-DT-S21-1-V007BTDTDP0C01V03V005 = 53
+      function getMaxHeaderLength() {
+        return 53;
+      }
+      const headerLengthHint = document.getElementById('headerLengthHint');
       
       // 设置初始值
       updateVehicleConfig();
@@ -387,8 +465,40 @@
         updateVehicleConfig();
       });
       
-      // 版本号变更事件
+      // 软件类型变更事件
+      softTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+          toggleBothMode();
+          updateVehicleConfig();
+        });
+      });
+      
+      // 软件+UI 模式切换
+      function toggleBothMode() {
+        const isBoth = getSoftType() === 'BOTH';
+        uiFileGroup.style.display = isBoth ? 'block' : 'none';
+        uiVersionGroup.style.display = isBoth ? 'block' : 'none';
+        appFileGroup.querySelector('label').textContent = isBoth ? '上传APP BIN文件' : '上传BIN文件';
+        if (!isBoth) {
+          uiFileInput.value = '';
+        }
+      }
+      
+      // 获取当前选中的软件类型
+      function getSoftType() {
+        for (const radio of softTypeRadios) {
+          if (radio.checked) return radio.value;
+        }
+        return 'SWDP';
+      }
+      
+      // 软件版本号变更事件
       versionInput.addEventListener('input', function() {
+        updateVehicleConfig();
+      });
+      
+      // UI版本号变更事件
+      uiVersionInput.addEventListener('input', function() {
         updateVehicleConfig();
       });
       
@@ -413,15 +523,16 @@
       // 更新车型配置
       function updateVehicleConfig() {
         const selectedModel = vehicleModel.value;
+        const softType = getSoftType();
         let version = versionInput.value.trim();
         const config = vehicleConfig[selectedModel];
         
         if (!version) {
-          // 如果版本号为空，保持当前值不变
+          // 如果软件版本号为空，保持当前值不变
           return;
         }
         
-        // 如果是BLE型号且版本号为默认值V037，则改为V001
+        // 如果是BLE型号且软件版本号为默认值V037，则改为V001
         if (selectedModel === 'BLE' && version === 'V037') {
           version = 'V001';
           versionInput.value = version;
@@ -430,9 +541,18 @@
         let header, filename;
         
         if (selectedModel === 'BLE') {
-          // BLE型号使用SWBE前缀和C01车型代码
+          // BLE型号使用SWBE前缀和C01车型代码（不受软件类型影响）
           header = `SWBE-DT-C01-1-${version}${config.suffix}`;
           filename = `SWBE-DT-C01-1-${version}.bin`;
+        } else if (softType === 'BOTH') {
+          // 软件+UI合成：SWDP-DT-XXX-1-V{软件版本}SWUI-DT-XXX-1-V{UI版本} + bothSuffix
+          const uiVersion = uiVersionInput.value.trim() || 'V007';
+          header = `SWDP-DT-${selectedModel}-1-${version}SWUI-DT-${selectedModel}-1-${uiVersion}${config.bothSuffix}`;
+          filename = `SWDP-DT-${selectedModel}-1-${version}.bin`;
+        } else if (softType === 'SWUI') {
+          // SWUI: 前缀为SWUI，前段版本固定V007
+          header = `SWUI-DT-${selectedModel}-1-V007${config.suffix}`;
+          filename = `SWUI-DT-${selectedModel}-1-V007.bin`;
         } else {
           // 其他车型使用SWDP前缀
           header = `SWDP-DT-${selectedModel}-1-${version}${config.suffix}`;
@@ -450,7 +570,29 @@
         // 更新十六进制示例
         const hexData = stringToHex(header);
         exampleHex.textContent = formatHex(hexData);
+        
+        // 包头长度校验提示
+        validateHeaderLength();
       }
+      
+      // 包头长度校验提示
+      function validateHeaderLength() {
+        const len = textInput.value.length;
+        const maxLen = getMaxHeaderLength();
+        if (len > 0 && len !== maxLen) {
+          textInput.style.borderColor = '#ff6b6b';
+          textInput.style.boxShadow = '0 0 0 3px rgba(255, 107, 107, 0.2)';
+          headerLengthHint.style.display = 'inline';
+          headerLengthHint.textContent = `长度错误！当前 ${len} 字节，需 ${maxLen} 字节`;
+        } else {
+          textInput.style.borderColor = '#ddd';
+          textInput.style.boxShadow = 'none';
+          headerLengthHint.style.display = 'none';
+        }
+      }
+      
+      // 手动修改包头数据时也做长度校验
+      textInput.addEventListener('input', validateHeaderLength);
       
       // 处理文件
       processBtn.addEventListener('click', processFile);
@@ -471,126 +613,163 @@
           return;
         }
         
+        // 包头数据长度限制
+        const maxHeaderLen = getMaxHeaderLength();
+        if (additionalData.length !== maxHeaderLen) {
+          showResult(`包头数据长度不正确！当前长度: ${additionalData.length} 字节，需要: ${maxHeaderLen} 字节`, 'error');
+          return;
+        }
+        
+        // BOTH模式需要校验UI文件
+        const isBothMode = getSoftType() === 'BOTH';
+        const uiFile = isBothMode ? uiFileInput.files[0] : null;
+        if (isBothMode && !uiFile) {
+          showResult('软件+UI模式下请上传UI BIN文件', 'error');
+          return;
+        }
+        
         if (!textFileNameData) {
           showResult('请输入生成的文件名', 'error');
           return;
         }
         
-        const reader = new FileReader();
+        // 先读取UI文件（如果需要），然后处理APP文件
+        async function readUiFileIfNeeded() {
+          if (isBothMode && uiFile) {
+            return new Promise((resolve, reject) => {
+              const uiReader = new FileReader();
+              uiReader.onload = function(e) {
+                resolve(new Uint8Array(e.target.result));
+              };
+              uiReader.onerror = function() { reject(new Error('读取UI文件失败')); };
+              uiReader.readAsArrayBuffer(uiFile);
+            });
+          }
+          return null;
+        }
         
-        reader.onload = async function(event) {
-          try {
-            const arrayBuffer = event.target.result;
-            const uint8Array = new Uint8Array(arrayBuffer);
-            const fileContent = event.target.result;
-            const fileLength = fileContent.byteLength;
-            
-            // 计算文件长度信息
-            let paddedLength;
-            if (fileLength % 60 === 0) {
-              paddedLength = fileLength;
-            } else {
-              paddedLength = Math.ceil(fileLength / 60) * 60;
-            }
-            
-            const hexResult = paddedLength.toString(16).toUpperCase().padStart(6, '0');
-            const rehexResult = fileLength.toString(16).toUpperCase().padStart(6, '0');
-            
-            // 显示文件信息
-            showResult(`原始文件长度: ${fileLength} bytes (0x${rehexResult})<br>对齐后长度: ${paddedLength} bytes (0x${hexResult})`);
-            
-            // 将包头数据转换成十六进制
-            const additionalHexData = stringToHex(additionalData);
-            const headerBytes = hexToBytes(additionalHexData);
-            
-            // 预览包头数据
-            previewData(headerBytes, headerPreview);
-            
-            // 创建长度信息字节数组 (前后补零)
-            const lenBytes = new Uint8Array(7);
-            // 前3个字节为0
-            lenBytes[0] = 0x00;
-            lenBytes[1] = 0x00;
-            lenBytes[2] = 0x00;
-            // 文件长度（3字节大端）
-            lenBytes[3] = (paddedLength >> 16) & 0xFF;
-            lenBytes[4] = (paddedLength >> 8) & 0xFF;
-            lenBytes[5] = paddedLength & 0xFF;
-            // 最后1个字节为0
-            lenBytes[6] = 0x00;
-            
-            // 预览长度信息
-            previewData(lenBytes, lengthPreview);
-            
-            // 预览文件内容 (只显示前16字节)
-            const previewContent = uint8Array.slice(0, 16);
-            previewData(previewContent, contentPreview);
-            contentPreview.innerHTML += ' ...';
-            
-            // 显示数据预览
-            dataPreview.style.display = 'block';
-            
-            // 创建新的Uint8Array：包头长度 + 7字节长度信息 + 文件内容长度
-            const newData = new Uint8Array(headerBytes.length + 7 + uint8Array.length);
-            
-            // 填充包头数据
-            newData.set(headerBytes, 0);
-            
-            // 填充长度信息
-            newData.set(lenBytes, headerBytes.length);
-            
-            // 填充文件内容
-            newData.set(uint8Array, headerBytes.length + 7);
-            
-            // 创建文件Blob
-            const blob = new Blob([newData], {type: 'application/octet-stream'});
-            const filename = textFileNameData.endsWith('.bin') ? textFileNameData : textFileNameData + '.bin';
-            
-            // 尝试使用已选择的目录保存文件
-            if (window.selectedDirectoryHandle) {
-              try {
-                const fileHandle = await saveFileToDirectory(blob, filename, newData.length);
-                showResult(`文件处理成功！已保存到目录: <strong>${fileHandle.name}</strong><br>总大小: ${newData.length} bytes`, 'success');
-                return;
-              } catch (err) {
-                console.error('保存到目录失败:', err);
-                // 继续尝试其他方式
+        readUiFileIfNeeded().then(async (uiUint8Array) => {
+          const reader = new FileReader();
+          
+          reader.onload = async function(event) {
+            try {
+              const arrayBuffer = event.target.result;
+              const uint8Array = new Uint8Array(arrayBuffer);
+              const fileContent = event.target.result;
+              const fileLength = fileContent.byteLength;
+              
+              // 计算文件长度信息（仅计算APP文件长度）
+              let paddedLength;
+              if (fileLength % 60 === 0) {
+                paddedLength = fileLength;
+              } else {
+                paddedLength = Math.ceil(fileLength / 60) * 60;
               }
-            }
-            
-            // 尝试使用现代文件系统API保存文件
-            if ('showSaveFilePicker' in window) {
-              try {
-                const handle = await window.showSaveFilePicker({
-                  suggestedName: filename,
-                  types: [{
-                    description: 'BIN文件',
-                    accept: {'application/octet-stream': ['.bin']}
-                  }]
-                });
-                const writable = await handle.createWritable();
-                await writable.write(blob);
-                await writable.close();
-                showResult(`文件处理成功！已保存到: <strong>${handle.name}</strong><br>总大小: ${newData.length} bytes`, 'success');
-              } catch (err) {
-                // 用户取消或错误，回退到下载方式
+              
+              const hexResult = paddedLength.toString(16).toUpperCase().padStart(6, '0');
+              const rehexResult = fileLength.toString(16).toUpperCase().padStart(6, '0');
+              
+              let infoMsg = `APP文件长度: ${fileLength} bytes (0x${rehexResult})<br>对齐后长度: ${paddedLength} bytes (0x${hexResult})`;
+              if (isBothMode && uiUint8Array) {
+                infoMsg += `<br>UI文件长度: ${uiUint8Array.length} bytes`;
+                infoMsg += `<br>总长度(含UI): ${paddedLength + uiUint8Array.length} bytes`;
+              }
+              showResult(infoMsg);
+              
+              // 将包头数据转换成十六进制
+              const additionalHexData = stringToHex(additionalData);
+              const headerBytes = hexToBytes(additionalHexData);
+              
+              // 预览包头数据
+              previewData(headerBytes, headerPreview);
+              
+              // 创建长度信息字节数组 (前后补零，仅记录APP长度)
+              const lenBytes = new Uint8Array(7);
+              lenBytes[0] = 0x00;
+              lenBytes[1] = 0x00;
+              lenBytes[2] = 0x00;
+              lenBytes[3] = (paddedLength >> 16) & 0xFF;
+              lenBytes[4] = (paddedLength >> 8) & 0xFF;
+              lenBytes[5] = paddedLength & 0xFF;
+              lenBytes[6] = 0x00;
+              
+              // 预览长度信息
+              previewData(lenBytes, lengthPreview);
+              
+              // 预览文件内容 (只显示前16字节)
+              const previewContent = uint8Array.slice(0, 16);
+              previewData(previewContent, contentPreview);
+              contentPreview.innerHTML += ' ...';
+              
+              // 显示数据预览
+              dataPreview.style.display = 'block';
+              
+              // 计算总大小：BOTH模式下在APP内容后追加UI内容
+              const uiContentLength = (isBothMode && uiUint8Array) ? uiUint8Array.length : 0;
+              const newData = new Uint8Array(headerBytes.length + 7 + uint8Array.length + uiContentLength);
+              
+              // 填充包头数据
+              newData.set(headerBytes, 0);
+              
+              // 填充长度信息
+              newData.set(lenBytes, headerBytes.length);
+              
+              // 填充APP文件内容
+              newData.set(uint8Array, headerBytes.length + 7);
+              
+              // BOTH模式：在末尾追加UI文件内容
+              if (isBothMode && uiUint8Array) {
+                newData.set(uiUint8Array, headerBytes.length + 7 + uint8Array.length);
+              }
+              
+              // 创建文件Blob
+              const blob = new Blob([newData], {type: 'application/octet-stream'});
+              const filename = textFileNameData.endsWith('.bin') ? textFileNameData : textFileNameData + '.bin';
+              
+              // 尝试使用已选择的目录保存文件
+              if (window.selectedDirectoryHandle) {
+                try {
+                  const fileHandle = await saveFileToDirectory(blob, filename, newData.length);
+                  showResult(`文件处理成功！已保存到目录: <strong>${fileHandle.name}</strong><br>总大小: ${newData.length} bytes`, 'success');
+                  return;
+                } catch (err) {
+                  console.error('保存到目录失败:', err);
+                }
+              }
+              
+              if ('showSaveFilePicker' in window) {
+                try {
+                  const handle = await window.showSaveFilePicker({
+                    suggestedName: filename,
+                    types: [{
+                      description: 'BIN文件',
+                      accept: {'application/octet-stream': ['.bin']}
+                    }]
+                  });
+                  const writable = await handle.createWritable();
+                  await writable.write(blob);
+                  await writable.close();
+                  showResult(`文件处理成功！已保存到: <strong>${handle.name}</strong><br>总大小: ${newData.length} bytes`, 'success');
+                } catch (err) {
+                  fallbackDownload(blob, filename, newData.length);
+                }
+              } else {
                 fallbackDownload(blob, filename, newData.length);
               }
-            } else {
-              // 不支持showSaveFilePicker，使用下载方式
-              fallbackDownload(blob, filename, newData.length);
+            } catch (error) {
+              showResult(`处理文件时出错: ${error.message}`, 'error');
+              console.error(error);
             }
-          } catch (error) {
-            showResult(`处理文件时出错: ${error.message}`, 'error');
-            console.error(error);
-          }
-        };
-        
-        reader.onerror = function() {
-          showResult('读取文件时出错', 'error');
-        };
-        
-        reader.readAsArrayBuffer(file);
+          };
+          
+          reader.onerror = function() {
+            showResult('读取APP文件时出错', 'error');
+          };
+          
+          reader.readAsArrayBuffer(file);
+        }).catch(err => {
+          showResult(err.message, 'error');
+        });
       }
       
       // 回退下载函数
