@@ -545,10 +545,13 @@
           header = `SWBE-DT-C01-1-${version}${config.suffix}`;
           filename = `SWBE-DT-C01-1-${version}.bin`;
         } else if (softType === 'BOTH') {
-          // 软件+UI合成：SWDP-DT-XXX-1-V{软件版本}SWUI-DT-XXX-1-V{UI版本} + bothSuffix
+          // 软件+UI合成：UI在前APP在后 + bothSuffix
+          // 包头: SWUI-DT-XXX-1-V{UI版本}SWDP-DT-XXX-1-V{软件版本}{bothSuffix}
+          // 文件名: SWUI-DT-XXX-1-V{UI版本}_A_{软件版本}.bin
           const uiVersion = uiVersionInput.value.trim() || 'V007';
-          header = `SWDP-DT-${selectedModel}-1-${version}SWUI-DT-${selectedModel}-1-${uiVersion}${config.bothSuffix}`;
-          filename = `SWDP-DT-${selectedModel}-1-${version}.bin`;
+          const appVerShort = version.startsWith('V') ? version.substring(1) : version;
+          header = `SWUI-DT-${selectedModel}-1-${uiVersion}SWDP-DT-${selectedModel}-1-${version}${config.bothSuffix}`;
+          filename = `SWUI-DT-${selectedModel}-1-${uiVersion}_A_${appVerShort}.bin`;
         } else if (softType === 'SWUI') {
           // SWUI: 前缀为SWUI，前段版本固定V007
           header = `SWUI-DT-${selectedModel}-1-V007${config.suffix}`;
@@ -671,7 +674,9 @@
               
               let infoMsg = `APP文件长度: ${fileLength} bytes (0x${rehexResult})<br>对齐后长度: ${paddedLength} bytes (0x${hexResult})`;
               if (isBothMode && uiUint8Array) {
-                infoMsg += `<br>UI文件长度: ${uiUint8Array.length} bytes`;
+                const crcVal = calcCRC8(uint8Array);
+                infoMsg += `<br>APP数据CRC8: 0x${crcVal.toString(16).toUpperCase().padStart(2, '0')}`;
+                infoMsg += `<br>UI文件长度(写入长度字段): ${uiUint8Array.length} bytes`;
                 infoMsg += `<br>总长度(含UI): ${paddedLength + uiUint8Array.length} bytes`;
               }
               showResult(infoMsg);
@@ -683,14 +688,23 @@
               // 预览包头数据
               previewData(headerBytes, headerPreview);
               
-              // 创建长度信息字节数组 (前后补零，仅记录APP长度)
+              // 创建长度信息字节数组 (前后补零)
               const lenBytes = new Uint8Array(7);
               lenBytes[0] = 0x00;
-              lenBytes[1] = 0x00;
+              // BOTH模式: lenBytes[1] 填充APP数据的CRC8校验值; 非BOTH模式: 填0x00
+              lenBytes[1] = isBothMode ? calcCRC8(uint8Array) : 0x00;
               lenBytes[2] = 0x00;
-              lenBytes[3] = (paddedLength >> 16) & 0xFF;
-              lenBytes[4] = (paddedLength >> 8) & 0xFF;
-              lenBytes[5] = paddedLength & 0xFF;
+
+              // BOTH模式: paddedLength表示UI文件大小; 非BOTH模式: 表示APP文件对齐后长度
+              let lengthForBytes;
+              if (isBothMode && uiUint8Array) {
+                lengthForBytes = uiUint8Array.length;
+              } else {
+                lengthForBytes = paddedLength;
+              }
+              lenBytes[3] = (lengthForBytes >> 16) & 0xFF;
+              lenBytes[4] = (lengthForBytes >> 8) & 0xFF;
+              lenBytes[5] = lengthForBytes & 0xFF;
               lenBytes[6] = 0x00;
               
               // 预览长度信息
@@ -704,7 +718,7 @@
               // 显示数据预览
               dataPreview.style.display = 'block';
               
-              // 计算总大小：BOTH模式下在APP内容后追加UI内容
+              // 计算总大小：BOTH模式下UI在前APP在后
               const uiContentLength = (isBothMode && uiUint8Array) ? uiUint8Array.length : 0;
               const newData = new Uint8Array(headerBytes.length + 7 + uint8Array.length + uiContentLength);
               
@@ -714,12 +728,13 @@
               // 填充长度信息
               newData.set(lenBytes, headerBytes.length);
               
-              // 填充APP文件内容
-              newData.set(uint8Array, headerBytes.length + 7);
-              
-              // BOTH模式：在末尾追加UI文件内容
               if (isBothMode && uiUint8Array) {
-                newData.set(uiUint8Array, headerBytes.length + 7 + uint8Array.length);
+                // BOTH模式：UI文件在前，APP文件在后
+                newData.set(uiUint8Array, headerBytes.length + 7);
+                newData.set(uint8Array, headerBytes.length + 7 + uiUint8Array.length);
+              } else {
+                // 非BOTH模式：填充APP文件内容
+                newData.set(uint8Array, headerBytes.length + 7);
               }
               
               // 创建文件Blob
@@ -805,6 +820,22 @@
         }
       }
       
+      // CRC8 校验算法 (多项式 0x07)
+      function calcCRC8(data) {
+        let crc = 0;
+        for (let k = 0; k < data.length; k++) {
+          crc ^= data[k];
+          for (let bit = 0; bit < 8; bit++) {
+            if (crc & 0x80) {
+              crc = ((crc << 1) ^ 0x07) & 0xFF;
+            } else {
+              crc = (crc << 1) & 0xFF;
+            }
+          }
+        }
+        return crc;
+      }
+
       // 将字符串转换成十六进制表示
       function stringToHex(str) {
         let hex = '';
