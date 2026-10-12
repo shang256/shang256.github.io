@@ -227,6 +227,7 @@
     <header>
       <h1>唯乐高上位机升级文件合成工具</h1>
       <p class="subtitle">生成符合规范的升级文件</p>
+      <p class="subtitle">2026年10月12日</p>
     </header>
     
     <div class="content">
@@ -254,7 +255,7 @@
             <option value="R01">R01</option>
             <option value="F03">F03-VBIKE008-F2</option>
             <option value="M11">M11-VBIKE009-N3</option>
-            <option value="M12">M12-VBIKE019-N3X</option>
+            <option value="M12">M12-VBIKE010-N3X</option>
             <option value="U01">U01-VBIKE011-P2</option>
             <option value="S10">S10</option>
             <option value="C31">C31-VBIKE002</option>
@@ -553,9 +554,9 @@
           header = `SWUI-DT-${selectedModel}-1-${uiVersion}SWDP-DT-${selectedModel}-1-${version}${config.bothSuffix}`;
           filename = `SWUI-DT-${selectedModel}-1-${uiVersion}_A_${appVerShort}.bin`;
         } else if (softType === 'SWUI') {
-          // SWUI: 前缀为SWUI，前段版本固定V007
-          header = `SWUI-DT-${selectedModel}-1-V007${config.suffix}`;
-          filename = `SWUI-DT-${selectedModel}-1-V007.bin`;
+          // SWUI: 前缀为SWUI，版本号取软件版本号输入框的值
+          header = `SWUI-DT-${selectedModel}-1-${version}${config.suffix}`;
+          filename = `SWUI-DT-${selectedModel}-1-${version}.bin`;
         } else {
           // 其他车型使用SWDP前缀
           header = `SWDP-DT-${selectedModel}-1-${version}${config.suffix}`;
@@ -673,9 +674,13 @@
               const rehexResult = fileLength.toString(16).toUpperCase().padStart(6, '0');
               
               let infoMsg = `APP文件长度: ${fileLength} bytes (0x${rehexResult})<br>对齐后长度: ${paddedLength} bytes (0x${hexResult})`;
-              if (isBothMode && uiUint8Array) {
+              // SWDP和BOTH模式: 计算APP数据的CRC8校验值
+              const needCrc = (getSoftType() === 'SWDP' || isBothMode);
+              if (needCrc) {
                 const crcVal = calcCRC8(uint8Array);
                 infoMsg += `<br>APP数据CRC8: 0x${crcVal.toString(16).toUpperCase().padStart(2, '0')}`;
+              }
+              if (isBothMode && uiUint8Array) {
                 infoMsg += `<br>UI文件长度(写入长度字段): ${uiUint8Array.length} bytes`;
                 infoMsg += `<br>总长度(含UI): ${paddedLength + uiUint8Array.length} bytes`;
               }
@@ -691,8 +696,8 @@
               // 创建长度信息字节数组 (前后补零)
               const lenBytes = new Uint8Array(7);
               lenBytes[0] = 0x00;
-              // BOTH模式: lenBytes[1] 填充APP数据的CRC8校验值; 非BOTH模式: 填0x00
-              lenBytes[1] = isBothMode ? calcCRC8(uint8Array) : 0x00;
+              // SWDP和BOTH模式: lenBytes[1] 填充APP数据的CRC8校验值; 其他模式: 填0x00
+              lenBytes[1] = needCrc ? calcCRC8(uint8Array) : 0x00;
               lenBytes[2] = 0x00;
 
               // BOTH模式: paddedLength表示UI文件大小; 非BOTH模式: 表示APP文件对齐后长度
