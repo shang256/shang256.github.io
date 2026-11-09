@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<!-- <html lang="zh-CN"> -->
+<head>
+<!-- <meta charset="UTF-8"> -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>哈啰 BIN 文件打包工具（网页版）</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-2: #1e293b;
+    --card: #ffffff;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --accent: #06b6d4;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --danger: #ef4444;
+    --success: #10b981;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #0ea5e9 100%);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 24px 16px 60px;
+  }
+
+  .container { max-width: 1080px; margin: 0 auto; }
+
+  header.hero {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 26px;
+  }
+  header.hero h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  header.hero h1 .logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px; height: 42px;
+    background: rgba(255,255,255,.15);
+    border-radius: 12px;
+    font-size: 20px;
+  }
+  header.hero p { margin-top: 8px; font-size: 14px; opacity: .85; }
+
+  .grid { display: grid; grid-template-columns: 340px 1fr; gap: 20px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    padding: 20px;
+  }
+  .card h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+  }
+  .card h2 .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--primary);
+    display: inline-block;
+  }
+
+  /* 拖拽区域 */
+  .dropzone {
+    border: 2.5px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s ease;
+    background: #f8fafc;
+    position: relative;
+  }
+  .dropzone.dragover {
+    border-color: var(--primary);
+    background: #eff6ff;
+    transform: scale(1.01);
+  }
+  .dropzone .icon { font-size: 42px; margin-bottom: 8px; }
+  .dropzone p { color: var(--muted); font-size: 14px; }
+  .dropzone .strong { color: var(--primary); font-weight: 600; }
+  .dropzone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+  /* 表单 */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    font-size: 14px;
+    background: #fff;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--primary); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* 头部预览 */
+  .header-preview {
+    background: #0f172a;
+    color: #d1fae5;
+    border-radius: 9px;
+    padding: 12px;
+    font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    word-break: break-all;
+    margin-top: 6px;
+  }
+  .header-preview .ascii { color: #fbbf24; }
+
+  /* 输出目录 */
+  .dir-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f1f5f9;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    padding: 8px 12px;
+  }
+  .dir-box .dir-name {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dir-box .dir-name.empty { color: var(--muted); font-style: italic; }
+
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+    transition: all .15s ease;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-hover); }
+  .btn-outline { background: #fff; color: var(--primary); border: 1.5px solid var(--primary); }
+  .btn-outline:hover { background: #eff6ff; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 7px; }
+  .btn-block { width: 100%; }
+
+  /* 文件列表 */
+  .file-list { margin-top: 6px; }
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #fff;
+    transition: box-shadow .15s;
+  }
+  .file-item:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+  .file-icon {
+    width: 40px; height: 40px;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .file-meta { flex: 1; min-width: 0; }
+  .file-name { font-size: 14px; font-weight: 600; word-break: break-all; }
+  .file-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .file-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-right: 6px;
+  }
+  .badge-packed { background: #dcfce7; color: #15803d; }
+  .badge-raw { background: #fef3c7; color: #b45309; }
+  .file-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .empty-tip {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 30px 0;
+  }
+
+  .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+
+  /* 通知 */
+  .toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; }
+  .toast {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    padding: 12px 16px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: slideIn .25s ease;
+    max-width: 340px;
+  }
+  .toast.success { border-left: 4px solid var(--success); }
+  .toast.error { border-left: 4px solid var(--danger); }
+  .toast.info { border-left: 4px solid var(--accent); }
+  @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .footer-note {
+    margin-top: 20px;
+    color: #fff;
+    opacity: .75;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="hero">
+    <h1><span class="logo">?</span>哈啰 BIN 文件打包工具</h1>
+    <p>拖拽 bin 文件 → 设置打包参数 → 生成并保存到指定目录</p>
+  </header>
+
+  <div class="grid">
+    <!-- 左侧：设置 -->
+    <div>
+      <div class="card" style="margin-bottom:20px;">
+        <h2><span class="dot"></span>打包参数</h2>
+
+        <div class="field">
+          <label>分区类型（Magic 标识，OY32 固定为 O32）</label>
+          <select id="magic">
+            <option value="O32" selected>O32（OY32 APP 分区，固定）</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>产品型号（固定 OY32）</label>
+          <select id="model">
+            <option value="OY32" selected>OY32（固定）</option>
+          </select>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label>固件版本（FW_ 前缀自动添加）</label>
+            <input id="fw" value="V2.0.0" placeholder="V2.0.0">
+          </div>
+          <div class="field">
+            <label>硬件版本（HW_ 前缀自动添加）</label>
+            <input id="hw" value="V0.0" placeholder="V0.0">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>打包头预览（Hex / ASCII）</label>
+          <div class="header-preview" id="headerPreview"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>输出目录</h2>
+
+        <div class="field">
+          <label>输出文件命名（打包时生效，自动加 .bin 后缀）</label>
+          <input id="outName" placeholder="如输入 123，打包输出为 123.bin；留空则按原文件名输出">
+        </div>
+
+        <div class="dir-box">
+          <span class="dir-name empty" id="dirLabel">尚未选择目录（将使用浏览器下载）</span>
+          <button class="btn-outline btn-sm" id="btnSelectDir">选择目录</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6;">
+          提示：Chrome / Edge 支持通过「文件系统访问 API」直接选择目录并写入文件；若不支持将自动回退为浏览器下载。<br>
+          多文件批量打包时，输出文件自动加序号（如 123_1.bin、123_2.bin）以防覆盖。
+        </p>
+      </div>
+    </div>
+
+    <!-- 右侧：文件 -->
+    <div class="card">
+      <h2><span class="dot"></span>文件列表</h2>
+
+      <div class="dropzone" id="dropzone">
+        <div class="icon">??</div>
+        <p>将 <span class="strong">.bin 文件</span> 拖拽到此处</p>
+        <p style="font-size:12px;margin-top:4px;">或点击选择文件（可多选）</p>
+        <input type="file" id="fileInput" accept=".bin,.BIN" multiple>
+      </div>
+
+      <div class="toolbar" style="margin-top:16px;">
+        <button class="btn-primary" id="btnPackAll">全部打包</button>
+        <button class="btn-outline" id="btnClear">清空列表</button>
+      </div>
+
+      <div class="file-list" id="fileList">
+        <div class="empty-tip">暂无文件，请先拖入或选择 bin 文件</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    打包头格式（256 字节头区域 + 固件镜像，文件总大小 = 256 + 固件长度）：<code>CRC8(1) + 分区O32(3) + 空格 + 型号OY32(4) + 2空格 + FW_版本(9) + 空格 + HW_版本(7) + 空格 + 4字节大端固件长度(4) + 0xFF填充(223)</code>，随后为固件镜像。<br>
+    格式依据 OY32 实际固件包（APP.bin / OTA 包）与设备端 BOOT 源码（SPI_FlashReadForCrc8）验证；CRC8 为 CRC-8/MAXIM（多项式 0x8C 反射、初值 0x00），计算固件镜像前 4 字节对齐部分。
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============ 常量 ============
+  // 头区域共 256 字节：前 33 字节为头部字段，33~255 为 0xFF 填充，固件镜像从偏移 256 开始
+  const HEADER_SIZE = 256;
+  const HEADER_FIELD_SIZE = 33;
+
+  // ============ CRC 计算 ============
+  // CRC-8/MAXIM（Dallas）：LSB-first，多项式 0x8C（0x31 的反射），初值 0x00
+  // 与设备端 BOOT 固件 SPI_FlashReadForCrc8 实现一致；count 用于按 4 字节对齐截断
+  function crc8(data, count) {
+    let crc = 0;
+    const n = (count === undefined) ? data.length : count;
+    for (let i = 0; i < n; i++) {
+      crc ^= data[i];
+      for (let k = 0; k < 8; k++) {
+        crc = (crc & 1) ? ((crc >>> 1) ^ 0x8C) & 0xFF : (crc >>> 1) & 0xFF;
+      }
+    }
+    return crc & 0xFF;
+  }
+
+  // ============ 打包头 ============
+  function asciiPad(str, len) {
+    const bytes = new Uint8Array(len).fill(0x20);
+    for (let i = 0; i < Math.min(str.length, len); i++) {
+      bytes[i] = str.charCodeAt(i) & 0xFF;
+    }
+    return bytes;
+  }
+
+  function buildHeader(magic, model, fw, hw, fwData) {
+    // 头区域默认全 0xFF 填充
+    const b = new Uint8Array(HEADER_SIZE).fill(0xFF);
+    b.set(asciiPad(magic, 3), 1);             // 1-3   分区类型（O32）
+    b[4] = 0x20;                              // 4     空格
+    b.set(asciiPad(model, 4), 5);             // 5-8   型号（OY32）
+    b[9] = 0x20; b[10] = 0x20;                // 9-10  2 空格
+    b.set(asciiPad('FW_' + fw, 9), 11);       // 11-19 FW 版本
+    b[20] = 0x20;                             // 20    空格
+    b.set(asciiPad('HW_' + hw, 7), 21);       // 21-27 HW 版本
+    b[28] = 0x20;                             // 28    空格
+    if (fwData && fwData.length) {
+      // 0     固件镜像 CRC8（按 4 字节对齐截断，与设备端一致）
+      b[0] = crc8(fwData, Math.floor(fwData.length / 4) * 4);
+      // 29-32 4 字节大端固件长度
+      const len = fwData.length;
+      b[29] = (len >>> 24) & 0xFF;
+      b[30] = (len >>> 16) & 0xFF;
+      b[31] = (len >>> 8) & 0xFF;
+      b[32] = len & 0xFF;
+    }
+    return b;
+  }
+
+  function asciiRange(data, start, len) {
+    let s = '';
+    for (let i = start; i < start + len && i < data.length; i++) {
+      const c = data[i];
+      s += (c >= 0x20 && c <= 0x7E) ? String.fromCharCode(c) : '.';
+    }
+    return s;
+  }
+
+  // 检测是否为已打包文件（OY32 格式：256 字节头区域 + 固件镜像）
+  function parseHeader(data) {
+    if (data.length <= HEADER_SIZE) return null;
+    // 结构校验：分隔空格
+    if (data[4] !== 0x20 || data[9] !== 0x20 || data[10] !== 0x20 ||
+        data[20] !== 0x20 || data[28] !== 0x20) {
+      return null;
+    }
+    // 分区类型固定为 O32
+    if (asciiRange(data, 1, 3) !== 'O32') return null;
+    // 填充区（33-255）应为 0xFF
+    for (let i = HEADER_FIELD_SIZE; i < HEADER_SIZE; i++) {
+      if (data[i] !== 0xFF) return null;
+    }
+    // 长度字段应等于 文件大小 - 256
+    const fwLen = ((data[29] << 24) | (data[30] << 16) | (data[31] << 8) | data[32]) >>> 0;
+    if (fwLen !== data.length - HEADER_SIZE) return null;
+    const crc8Val = data[0];
+    const model = asciiRange(data, 5, 4);
+    const fw = asciiRange(data, 11, 9).trim();
+    const hw = asciiRange(data, 21, 7).trim();
+    return { crc8: crc8Val, magic: 'O32', model, fw, hw, fwLen };
+  }
+
+  function hexDump(data) {
+    const parts = [];
+    for (let i = 0; i < data.length; i++) {
+      parts.push(data[i].toString(16).toUpperCase().padStart(2, '0'));
+    }
+    return parts.join(' ');
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  // ============ 状态 ============
+  const files = [];          // { id, name, data(Uint8Array), size }
+  let outputDirHandle = null;
+
+  // ============ DOM ============
+  const $ = (id) => document.getElementById(id);
+  const dropzone = $('dropzone');
+  const fileInput = $('fileInput');
+  const fileList = $('fileList');
+  const headerPreview = $('headerPreview');
+  const dirLabel = $('dirLabel');
+
+  // ============ 头部预览 ============
+  function getParams() {
+    return {
+      magic: $('magic').value,
+      model: $('model').value,
+      fw: $('fw').value.trim(),
+      hw: $('hw').value.trim()
+    };
+  }
+
+  function renderHeaderPreview() {
+    const p = getParams();
+    // 预览仅展示头部字段区（33 字节）；CRC8 与固件长度在打包时按固件内容自动计算
+    const h = buildHeader(p.magic, p.model, p.fw, p.hw, null);
+    const fields = h.slice(0, HEADER_FIELD_SIZE);
+    const hex = hexDump(fields);
+    const ascii = asciiRange(fields, 0, HEADER_FIELD_SIZE);
+    headerPreview.innerHTML =
+      '<div>' + hex + '</div>' +
+      '<div class="ascii">' + ascii + '</div>' +
+      '<div class="ascii" style="margin-top:4px;">byte0 = 固件CRC8、byte29-32 = 4字节大端固件长度（打包时自动计算），byte33-255 = 0xFF 填充</div>';
+  }
+
+  ['magic', 'model', 'fw', 'hw'].forEach(id => {
+    $(id).addEventListener('input', renderHeaderPreview);
+    $(id).addEventListener('change', renderHeaderPreview);
+  });
+
+  // ============ 文件列表渲染 ============
+  function renderFileList() {
+    if (files.length === 0) {
+      fileList.innerHTML = '<div class="empty-tip">暂无文件，请先拖入或选择 bin 文件</div>';
+      return;
+    }
+    fileList.innerHTML = '';
+    files.forEach(f => {
+      const packed = parseHeader(f.data);
+      const item = document.createElement('div');
+      item.className = 'file-item';
+
+      const badge = packed
+        ? '<span class="file-badge badge-packed">已打包</span>'
+        : '<span class="file-badge badge-raw">原始固件</span>';
+
+      let sub = '大小：' + formatSize(f.size);
+
+      if (packed) {
+        sub += ' · 分区：' + packed.magic + ' · 型号：' + packed.model +
+          ' · ' + packed.fw + ' · ' + packed.hw +
+          ' · 固件长度：' + packed.fwLen +
+          ' · 头CRC8：0x' + packed.crc8.toString(16).toUpperCase().padStart(2, '0');
+      } else {
+        // 原始固件：显示其数据的 CRC8（打包时将写入头部 byte0）
+        sub += ' · 固件CRC8：0x' + crc8(f.data, Math.floor(f.data.length / 4) * 4).toString(16).toUpperCase().padStart(2, '0');
+      }
+
+      item.innerHTML =
+        '<div class="file-icon">?</div>' +
+        '<div class="file-meta">' +
+          '<div class="file-name">' + escapeHtml(f.name) + '</div>' +
+          '<div class="file-sub">' + badge + sub + '</div>' +
+        '</div>' +
+        '<div class="file-actions">' +
+          '<button class="btn-primary btn-sm" data-action="pack" data-id="' + f.id + '">打包</button>' +
+        '</div>';
+
+      fileList.appendChild(item);
+    });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  // ============ 添加文件 ============
+  function addFiles(fileObjList) {
+    let added = 0;
+    Array.from(fileObjList).forEach(f => {
+      if (!/\.bin$/i.test(f.name)) {
+        toast('已跳过非 .bin 文件：' + f.name, 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const buf = e.target.result;
+        const data = new Uint8Array(buf);
+        files.push({ id: Date.now() + '_' + Math.random().toString(36).slice(2), name: f.name, data, size: data.length });
+        renderFileList();
+      };
+      reader.readAsArrayBuffer(f);
+      added++;
+    });
+    if (added > 0) toast('已添加 ' + added + ' 个文件', 'success');
+  }
+
+  // ============ 打包 / 解包 ============
+  // 自定义输出文件名（清洗文件名非法字符，去掉误输入的 .bin 后缀）；留空返回空串
+  function getOutBaseName() {
+    let n = $('outName').value.trim();
+    if (!n) return '';
+    n = n.replace(/\.bin$/i, '');
+    n = n.replace(/[\\/:*?"<>|]/g, '_');
+    return n;
+  }
+
+  function packFile(f, seq) {
+    const p = getParams();
+    if (!p.fw || !p.hw) { toast('固件版本 / 硬件版本不能为空', 'error'); return null; }
+    // 已打包文件先剥离旧头，再按当前参数重新打包
+    const raw = parseHeader(f.data) ? f.data.slice(HEADER_SIZE) : f.data;
+    const header = buildHeader(p.magic, p.model, p.fw, p.hw, raw);
+    const out = new Uint8Array(HEADER_SIZE + raw.length);
+    out.set(header, 0);
+    out.set(raw, HEADER_SIZE);
+    // 自定义命名：单文件输出 名.bin，批量输出 名_序号.bin（防覆盖）；留空按原文件名输出
+    const custom = getOutBaseName();
+    const outName = custom
+      ? custom + (seq ? '_' + seq : '') + '.bin'
+      : stripExt(f.name) + '.packed.bin';
+    return { out, outName, header };
+  }
+
+  function stripExt(name) {
+    return name.replace(/\.bin$/i, '');
+  }
+
+  // ============ 保存文件 ============
+  async function saveFile(name, data) {
+    if (outputDirHandle && 'getFileHandle' in outputDirHandle) {
+      try {
+        const fh = await outputDirHandle.getFileHandle(name, { create: true });
+        const writable = await fh.createWritable();
+        await writable.write(data);
+        await writable.close();
+        return true;
+      } catch (e) {
+        console.error(e);
+        return false;
+      }
+    }
+    // 回退：浏览器下载
+    const blob = new Blob([data], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return true;
+  }
+
+  // ============ 事件绑定 ============
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) addFiles(fileInput.files);
+    fileInput.value = '';
+  });
+
+  fileList.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const f = files.find(x => x.id === id);
+    if (!f) return;
+
+    if (btn.dataset.action === 'pack') {
+      const r = packFile(f);
+      if (!r) return;
+      const ok = await saveFile(r.outName, r.out);
+      if (ok) toast('打包成功：' + r.outName, 'success');
+      else toast('保存失败：' + r.outName, 'error');
+    }
+  });
+
+  $('btnPackAll').addEventListener('click', async () => {
+    if (files.length === 0) { toast('请先添加 bin 文件', 'info'); return; }
+    let okCount = 0;
+    for (let i = 0; i < files.length; i++) {
+      // 多文件时输出 名_序号.bin 以防覆盖
+      const r = packFile(files[i], files.length > 1 ? i + 1 : undefined);
+      if (!r) continue;
+      if (await saveFile(r.outName, r.out)) okCount++;
+    }
+    toast('批量打包完成：成功 ' + okCount + ' / ' + files.length, okCount === files.length ? 'success' : 'error');
+  });
+
+  $('btnClear').addEventListener('click', () => {
+    files.length = 0;
+    renderFileList();
+    toast('已清空文件列表', 'info');
+  });
+
+  $('btnSelectDir').addEventListener('click', async () => {
+    if (!('showDirectoryPicker' in window)) {
+      toast('当前浏览器不支持目录选择，将使用浏览器下载', 'info');
+      outputDirHandle = null;
+      dirLabel.textContent = '尚未选择目录（将使用浏览器下载）';
+      dirLabel.classList.add('empty');
+      return;
+    }
+    try {
+      outputDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      dirLabel.textContent = '输出目录：' + outputDirHandle.name;
+      dirLabel.classList.remove('empty');
+      toast('已选择输出目录：' + outputDirHandle.name, 'success');
+    } catch (e) {
+      // 用户取消
+    }
+  });
+
+  // ============ Toast ============
+  function toast(msg, type = 'info') {
+    const wrap = $('toastWrap');
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.textContent = msg;
+    wrap.appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transition = 'opacity .3s';
+      setTimeout(() => el.remove(), 300);
+    }, 2600);
+  }
+
+  // 初始化
+  renderHeaderPreview();
+  renderFileList();
+})();
+</script>
+</body>
+</html>
