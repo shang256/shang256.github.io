@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- <html lang="zh-CN"> -->
+<html lang="zh-CN">
 <head>
-<!-- <meta charset="UTF-8"> -->
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>¹ş†ª BIN ÎÄ¼ş´ò°ü¹¤¾ß£¨ÍøÒ³°æ£©</title>
+<title>å“ˆå•° BIN æ–‡ä»¶æ‰“åŒ…å·¥å…·ï¼ˆç½‘é¡µç‰ˆï¼‰</title>
 <style>
   :root {
     --bg: #0f172a;
@@ -81,7 +81,7 @@
     display: inline-block;
   }
 
-  /* ÍÏ×§ÇøÓò */
+  /* æ‹–æ‹½åŒºåŸŸ */
   .dropzone {
     border: 2.5px dashed var(--border);
     border-radius: var(--radius);
@@ -102,7 +102,7 @@
   .dropzone .strong { color: var(--primary); font-weight: 600; }
   .dropzone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
-  /* ±íµ¥ */
+  /* è¡¨å• */
   .field { margin-bottom: 14px; }
   .field label {
     display: block;
@@ -125,7 +125,7 @@
   .field input:focus, .field select:focus { border-color: var(--primary); }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-  /* Í·²¿Ô¤ÀÀ */
+  /* å¤´éƒ¨é¢„è§ˆ */
   .header-preview {
     background: #0f172a;
     color: #d1fae5;
@@ -139,7 +139,7 @@
   }
   .header-preview .ascii { color: #fbbf24; }
 
-  /* Êä³öÄ¿Â¼ */
+  /* è¾“å‡ºç›®å½• */
   .dir-box {
     display: flex;
     align-items: center;
@@ -176,7 +176,7 @@
   .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 7px; }
   .btn-block { width: 100%; }
 
-  /* ÎÄ¼şÁĞ±í */
+  /* æ–‡ä»¶åˆ—è¡¨ */
   .file-list { margin-top: 6px; }
   .file-item {
     display: flex;
@@ -223,7 +223,7 @@
 
   .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 
-  /* Í¨Öª */
+  /* é€šçŸ¥ */
   .toast-wrap { position: fixed; top: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; }
   .toast {
     background: #fff;
@@ -255,91 +255,91 @@
 <body>
 <div class="container">
   <header class="hero">
-    <h1><span class="logo">?</span>¹ş†ª BIN ÎÄ¼ş´ò°ü¹¤¾ß</h1>
-    <p>ÍÏ×§ bin ÎÄ¼ş ¡ú ÉèÖÃ´ò°ü²ÎÊı ¡ú Éú³É²¢±£´æµ½Ö¸¶¨Ä¿Â¼</p>
+    <h1><span class="logo">?</span>å“ˆå•° BIN æ–‡ä»¶æ‰“åŒ…å·¥å…·</h1>
+    <p>æ‹–æ‹½ bin æ–‡ä»¶ â†’ è®¾ç½®æ‰“åŒ…å‚æ•° â†’ ç”Ÿæˆå¹¶ä¿å­˜åˆ°æŒ‡å®šç›®å½•</p>
   </header>
 
   <div class="grid">
-    <!-- ×ó²à£ºÉèÖÃ -->
+    <!-- å·¦ä¾§ï¼šè®¾ç½® -->
     <div>
       <div class="card" style="margin-bottom:20px;">
-        <h2><span class="dot"></span>´ò°ü²ÎÊı</h2>
+        <h2><span class="dot"></span>æ‰“åŒ…å‚æ•°</h2>
 
         <div class="field">
-          <label>·ÖÇøÀàĞÍ£¨Magic ±êÊ¶£¬OY32 ¹Ì¶¨Îª O32£©</label>
+          <label>åˆ†åŒºç±»å‹ï¼ˆMagic æ ‡è¯†ï¼ŒOY32 å›ºå®šä¸º O32ï¼‰</label>
           <select id="magic">
-            <option value="O32" selected>O32£¨OY32 APP ·ÖÇø£¬¹Ì¶¨£©</option>
+            <option value="O32" selected>O32ï¼ˆOY32 APP åˆ†åŒºï¼Œå›ºå®šï¼‰</option>
           </select>
         </div>
 
         <div class="field">
-          <label>²úÆ·ĞÍºÅ£¨¹Ì¶¨ OY32£©</label>
+          <label>äº§å“å‹å·ï¼ˆå›ºå®š OY32ï¼‰</label>
           <select id="model">
-            <option value="OY32" selected>OY32£¨¹Ì¶¨£©</option>
+            <option value="OY32" selected>OY32ï¼ˆå›ºå®šï¼‰</option>
           </select>
         </div>
 
         <div class="row2">
           <div class="field">
-            <label>¹Ì¼ş°æ±¾£¨FW_ Ç°×º×Ô¶¯Ìí¼Ó£©</label>
+            <label>å›ºä»¶ç‰ˆæœ¬ï¼ˆFW_ å‰ç¼€è‡ªåŠ¨æ·»åŠ ï¼‰</label>
             <input id="fw" value="V2.0.0" placeholder="V2.0.0">
           </div>
           <div class="field">
-            <label>Ó²¼ş°æ±¾£¨HW_ Ç°×º×Ô¶¯Ìí¼Ó£©</label>
+            <label>ç¡¬ä»¶ç‰ˆæœ¬ï¼ˆHW_ å‰ç¼€è‡ªåŠ¨æ·»åŠ ï¼‰</label>
             <input id="hw" value="V0.0" placeholder="V0.0">
           </div>
         </div>
 
         <div class="field">
-          <label>´ò°üÍ·Ô¤ÀÀ£¨Hex / ASCII£©</label>
+          <label>æ‰“åŒ…å¤´é¢„è§ˆï¼ˆHex / ASCIIï¼‰</label>
           <div class="header-preview" id="headerPreview"></div>
         </div>
       </div>
 
       <div class="card">
-        <h2><span class="dot"></span>Êä³öÄ¿Â¼</h2>
+        <h2><span class="dot"></span>è¾“å‡ºç›®å½•</h2>
 
         <div class="field">
-          <label>Êä³öÎÄ¼şÃüÃû£¨´ò°üÊ±ÉúĞ§£¬×Ô¶¯¼Ó .bin ºó×º£©</label>
-          <input id="outName" placeholder="ÈçÊäÈë 123£¬´ò°üÊä³öÎª 123.bin£»Áô¿ÕÔò°´Ô­ÎÄ¼şÃûÊä³ö">
+          <label>è¾“å‡ºæ–‡ä»¶å‘½åï¼ˆæ‰“åŒ…æ—¶ç”Ÿæ•ˆï¼Œè‡ªåŠ¨åŠ  .bin åç¼€ï¼‰</label>
+          <input id="outName" placeholder="å¦‚è¾“å…¥ 123ï¼Œæ‰“åŒ…è¾“å‡ºä¸º 123.binï¼›ç•™ç©ºåˆ™æŒ‰åŸæ–‡ä»¶åè¾“å‡º">
         </div>
 
         <div class="dir-box">
-          <span class="dir-name empty" id="dirLabel">ÉĞÎ´Ñ¡ÔñÄ¿Â¼£¨½«Ê¹ÓÃä¯ÀÀÆ÷ÏÂÔØ£©</span>
-          <button class="btn-outline btn-sm" id="btnSelectDir">Ñ¡ÔñÄ¿Â¼</button>
+          <span class="dir-name empty" id="dirLabel">å°šæœªé€‰æ‹©ç›®å½•ï¼ˆå°†ä½¿ç”¨æµè§ˆå™¨ä¸‹è½½ï¼‰</span>
+          <button class="btn-outline btn-sm" id="btnSelectDir">é€‰æ‹©ç›®å½•</button>
         </div>
         <p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6;">
-          ÌáÊ¾£ºChrome / Edge Ö§³ÖÍ¨¹ı¡¸ÎÄ¼şÏµÍ³·ÃÎÊ API¡¹Ö±½ÓÑ¡ÔñÄ¿Â¼²¢Ğ´ÈëÎÄ¼ş£»Èô²»Ö§³Ö½«×Ô¶¯»ØÍËÎªä¯ÀÀÆ÷ÏÂÔØ¡£<br>
-          ¶àÎÄ¼şÅúÁ¿´ò°üÊ±£¬Êä³öÎÄ¼ş×Ô¶¯¼ÓĞòºÅ£¨Èç 123_1.bin¡¢123_2.bin£©ÒÔ·À¸²¸Ç¡£
+          æç¤ºï¼šChrome / Edge æ”¯æŒé€šè¿‡ã€Œæ–‡ä»¶ç³»ç»Ÿè®¿é—® APIã€ç›´æ¥é€‰æ‹©ç›®å½•å¹¶å†™å…¥æ–‡ä»¶ï¼›è‹¥ä¸æ”¯æŒå°†è‡ªåŠ¨å›é€€ä¸ºæµè§ˆå™¨ä¸‹è½½ã€‚<br>
+          å¤šæ–‡ä»¶æ‰¹é‡æ‰“åŒ…æ—¶ï¼Œè¾“å‡ºæ–‡ä»¶è‡ªåŠ¨åŠ åºå·ï¼ˆå¦‚ 123_1.binã€123_2.binï¼‰ä»¥é˜²è¦†ç›–ã€‚
         </p>
       </div>
     </div>
 
-    <!-- ÓÒ²à£ºÎÄ¼ş -->
+    <!-- å³ä¾§ï¼šæ–‡ä»¶ -->
     <div class="card">
-      <h2><span class="dot"></span>ÎÄ¼şÁĞ±í</h2>
+      <h2><span class="dot"></span>æ–‡ä»¶åˆ—è¡¨</h2>
 
       <div class="dropzone" id="dropzone">
         <div class="icon">??</div>
-        <p>½« <span class="strong">.bin ÎÄ¼ş</span> ÍÏ×§µ½´Ë´¦</p>
-        <p style="font-size:12px;margin-top:4px;">»òµã»÷Ñ¡ÔñÎÄ¼ş£¨¿É¶àÑ¡£©</p>
+        <p>å°† <span class="strong">.bin æ–‡ä»¶</span> æ‹–æ‹½åˆ°æ­¤å¤„</p>
+        <p style="font-size:12px;margin-top:4px;">æˆ–ç‚¹å‡»é€‰æ‹©æ–‡ä»¶ï¼ˆå¯å¤šé€‰ï¼‰</p>
         <input type="file" id="fileInput" accept=".bin,.BIN" multiple>
       </div>
 
       <div class="toolbar" style="margin-top:16px;">
-        <button class="btn-primary" id="btnPackAll">È«²¿´ò°ü</button>
-        <button class="btn-outline" id="btnClear">Çå¿ÕÁĞ±í</button>
+        <button class="btn-primary" id="btnPackAll">å…¨éƒ¨æ‰“åŒ…</button>
+        <button class="btn-outline" id="btnClear">æ¸…ç©ºåˆ—è¡¨</button>
       </div>
 
       <div class="file-list" id="fileList">
-        <div class="empty-tip">ÔİÎŞÎÄ¼ş£¬ÇëÏÈÍÏÈë»òÑ¡Ôñ bin ÎÄ¼ş</div>
+        <div class="empty-tip">æš‚æ— æ–‡ä»¶ï¼Œè¯·å…ˆæ‹–å…¥æˆ–é€‰æ‹© bin æ–‡ä»¶</div>
       </div>
     </div>
   </div>
 
   <div class="footer-note">
-    ´ò°üÍ·¸ñÊ½£¨256 ×Ö½ÚÍ·ÇøÓò + ¹Ì¼ş¾µÏñ£¬ÎÄ¼ş×Ü´óĞ¡ = 256 + ¹Ì¼ş³¤¶È£©£º<code>CRC8(1) + ·ÖÇøO32(3) + ¿Õ¸ñ + ĞÍºÅOY32(4) + 2¿Õ¸ñ + FW_°æ±¾(9) + ¿Õ¸ñ + HW_°æ±¾(7) + ¿Õ¸ñ + 4×Ö½Ú´ó¶Ë¹Ì¼ş³¤¶È(4) + 0xFFÌî³ä(223)</code>£¬ËæºóÎª¹Ì¼ş¾µÏñ¡£<br>
-    ¸ñÊ½ÒÀ¾İ OY32 Êµ¼Ê¹Ì¼ş°ü£¨APP.bin / OTA °ü£©ÓëÉè±¸¶Ë BOOT Ô´Âë£¨SPI_FlashReadForCrc8£©ÑéÖ¤£»CRC8 Îª CRC-8/MAXIM£¨¶àÏîÊ½ 0x8C ·´Éä¡¢³õÖµ 0x00£©£¬¼ÆËã¹Ì¼ş¾µÏñÇ° 4 ×Ö½Ú¶ÔÆë²¿·Ö¡£
+    æ‰“åŒ…å¤´æ ¼å¼ï¼ˆ256 å­—èŠ‚å¤´åŒºåŸŸ + å›ºä»¶é•œåƒï¼Œæ–‡ä»¶æ€»å¤§å° = 256 + å›ºä»¶é•¿åº¦ï¼‰ï¼š<code>CRC8(1) + åˆ†åŒºO32(3) + ç©ºæ ¼ + å‹å·OY32(4) + 2ç©ºæ ¼ + FW_ç‰ˆæœ¬(9) + ç©ºæ ¼ + HW_ç‰ˆæœ¬(7) + ç©ºæ ¼ + 4å­—èŠ‚å¤§ç«¯å›ºä»¶é•¿åº¦(4) + 0xFFå¡«å……(223)</code>ï¼Œéšåä¸ºå›ºä»¶é•œåƒã€‚<br>
+    æ ¼å¼ä¾æ® OY32 å®é™…å›ºä»¶åŒ…ï¼ˆAPP.bin / OTA åŒ…ï¼‰ä¸è®¾å¤‡ç«¯ BOOT æºç ï¼ˆSPI_FlashReadForCrc8ï¼‰éªŒè¯ï¼›CRC8 ä¸º CRC-8/MAXIMï¼ˆå¤šé¡¹å¼ 0x8C åå°„ã€åˆå€¼ 0x00ï¼‰ï¼Œè®¡ç®—å›ºä»¶é•œåƒå‰ 4 å­—èŠ‚å¯¹é½éƒ¨åˆ†ã€‚
   </div>
 </div>
 
@@ -349,14 +349,14 @@
 (function () {
   'use strict';
 
-  // ============ ³£Á¿ ============
-  // Í·ÇøÓò¹² 256 ×Ö½Ú£ºÇ° 33 ×Ö½ÚÎªÍ·²¿×Ö¶Î£¬33~255 Îª 0xFF Ìî³ä£¬¹Ì¼ş¾µÏñ´ÓÆ«ÒÆ 256 ¿ªÊ¼
+  // ============ å¸¸é‡ ============
+  // å¤´åŒºåŸŸå…± 256 å­—èŠ‚ï¼šå‰ 33 å­—èŠ‚ä¸ºå¤´éƒ¨å­—æ®µï¼Œ33~255 ä¸º 0xFF å¡«å……ï¼Œå›ºä»¶é•œåƒä»åç§» 256 å¼€å§‹
   const HEADER_SIZE = 256;
   const HEADER_FIELD_SIZE = 33;
 
-  // ============ CRC ¼ÆËã ============
-  // CRC-8/MAXIM£¨Dallas£©£ºLSB-first£¬¶àÏîÊ½ 0x8C£¨0x31 µÄ·´Éä£©£¬³õÖµ 0x00
-  // ÓëÉè±¸¶Ë BOOT ¹Ì¼ş SPI_FlashReadForCrc8 ÊµÏÖÒ»ÖÂ£»count ÓÃÓÚ°´ 4 ×Ö½Ú¶ÔÆë½Ø¶Ï
+  // ============ CRC è®¡ç®— ============
+  // CRC-8/MAXIMï¼ˆDallasï¼‰ï¼šLSB-firstï¼Œå¤šé¡¹å¼ 0x8Cï¼ˆ0x31 çš„åå°„ï¼‰ï¼Œåˆå€¼ 0x00
+  // ä¸è®¾å¤‡ç«¯ BOOT å›ºä»¶ SPI_FlashReadForCrc8 å®ç°ä¸€è‡´ï¼›count ç”¨äºæŒ‰ 4 å­—èŠ‚å¯¹é½æˆªæ–­
   function crc8(data, count) {
     let crc = 0;
     const n = (count === undefined) ? data.length : count;
@@ -369,7 +369,7 @@
     return crc & 0xFF;
   }
 
-  // ============ ´ò°üÍ· ============
+  // ============ æ‰“åŒ…å¤´ ============
   function asciiPad(str, len) {
     const bytes = new Uint8Array(len).fill(0x20);
     for (let i = 0; i < Math.min(str.length, len); i++) {
@@ -379,20 +379,20 @@
   }
 
   function buildHeader(magic, model, fw, hw, fwData) {
-    // Í·ÇøÓòÄ¬ÈÏÈ« 0xFF Ìî³ä
+    // å¤´åŒºåŸŸé»˜è®¤å…¨ 0xFF å¡«å……
     const b = new Uint8Array(HEADER_SIZE).fill(0xFF);
-    b.set(asciiPad(magic, 3), 1);             // 1-3   ·ÖÇøÀàĞÍ£¨O32£©
-    b[4] = 0x20;                              // 4     ¿Õ¸ñ
-    b.set(asciiPad(model, 4), 5);             // 5-8   ĞÍºÅ£¨OY32£©
-    b[9] = 0x20; b[10] = 0x20;                // 9-10  2 ¿Õ¸ñ
-    b.set(asciiPad('FW_' + fw, 9), 11);       // 11-19 FW °æ±¾
-    b[20] = 0x20;                             // 20    ¿Õ¸ñ
-    b.set(asciiPad('HW_' + hw, 7), 21);       // 21-27 HW °æ±¾
-    b[28] = 0x20;                             // 28    ¿Õ¸ñ
+    b.set(asciiPad(magic, 3), 1);             // 1-3   åˆ†åŒºç±»å‹ï¼ˆO32ï¼‰
+    b[4] = 0x20;                              // 4     ç©ºæ ¼
+    b.set(asciiPad(model, 4), 5);             // 5-8   å‹å·ï¼ˆOY32ï¼‰
+    b[9] = 0x20; b[10] = 0x20;                // 9-10  2 ç©ºæ ¼
+    b.set(asciiPad('FW_' + fw, 9), 11);       // 11-19 FW ç‰ˆæœ¬
+    b[20] = 0x20;                             // 20    ç©ºæ ¼
+    b.set(asciiPad('HW_' + hw, 7), 21);       // 21-27 HW ç‰ˆæœ¬
+    b[28] = 0x20;                             // 28    ç©ºæ ¼
     if (fwData && fwData.length) {
-      // 0     ¹Ì¼ş¾µÏñ CRC8£¨°´ 4 ×Ö½Ú¶ÔÆë½Ø¶Ï£¬ÓëÉè±¸¶ËÒ»ÖÂ£©
+      // 0     å›ºä»¶é•œåƒ CRC8ï¼ˆæŒ‰ 4 å­—èŠ‚å¯¹é½æˆªæ–­ï¼Œä¸è®¾å¤‡ç«¯ä¸€è‡´ï¼‰
       b[0] = crc8(fwData, Math.floor(fwData.length / 4) * 4);
-      // 29-32 4 ×Ö½Ú´ó¶Ë¹Ì¼ş³¤¶È
+      // 29-32 4 å­—èŠ‚å¤§ç«¯å›ºä»¶é•¿åº¦
       const len = fwData.length;
       b[29] = (len >>> 24) & 0xFF;
       b[30] = (len >>> 16) & 0xFF;
@@ -411,21 +411,21 @@
     return s;
   }
 
-  // ¼ì²âÊÇ·ñÎªÒÑ´ò°üÎÄ¼ş£¨OY32 ¸ñÊ½£º256 ×Ö½ÚÍ·ÇøÓò + ¹Ì¼ş¾µÏñ£©
+  // æ£€æµ‹æ˜¯å¦ä¸ºå·²æ‰“åŒ…æ–‡ä»¶ï¼ˆOY32 æ ¼å¼ï¼š256 å­—èŠ‚å¤´åŒºåŸŸ + å›ºä»¶é•œåƒï¼‰
   function parseHeader(data) {
     if (data.length <= HEADER_SIZE) return null;
-    // ½á¹¹Ğ£Ñé£º·Ö¸ô¿Õ¸ñ
+    // ç»“æ„æ ¡éªŒï¼šåˆ†éš”ç©ºæ ¼
     if (data[4] !== 0x20 || data[9] !== 0x20 || data[10] !== 0x20 ||
         data[20] !== 0x20 || data[28] !== 0x20) {
       return null;
     }
-    // ·ÖÇøÀàĞÍ¹Ì¶¨Îª O32
+    // åˆ†åŒºç±»å‹å›ºå®šä¸º O32
     if (asciiRange(data, 1, 3) !== 'O32') return null;
-    // Ìî³äÇø£¨33-255£©Ó¦Îª 0xFF
+    // å¡«å……åŒºï¼ˆ33-255ï¼‰åº”ä¸º 0xFF
     for (let i = HEADER_FIELD_SIZE; i < HEADER_SIZE; i++) {
       if (data[i] !== 0xFF) return null;
     }
-    // ³¤¶È×Ö¶ÎÓ¦µÈÓÚ ÎÄ¼ş´óĞ¡ - 256
+    // é•¿åº¦å­—æ®µåº”ç­‰äº æ–‡ä»¶å¤§å° - 256
     const fwLen = ((data[29] << 24) | (data[30] << 16) | (data[31] << 8) | data[32]) >>> 0;
     if (fwLen !== data.length - HEADER_SIZE) return null;
     const crc8Val = data[0];
@@ -449,7 +449,7 @@
     return (bytes / 1024 / 1024).toFixed(2) + ' MB';
   }
 
-  // ============ ×´Ì¬ ============
+  // ============ çŠ¶æ€ ============
   const files = [];          // { id, name, data(Uint8Array), size }
   let outputDirHandle = null;
 
@@ -461,7 +461,7 @@
   const headerPreview = $('headerPreview');
   const dirLabel = $('dirLabel');
 
-  // ============ Í·²¿Ô¤ÀÀ ============
+  // ============ å¤´éƒ¨é¢„è§ˆ ============
   function getParams() {
     return {
       magic: $('magic').value,
@@ -473,7 +473,7 @@
 
   function renderHeaderPreview() {
     const p = getParams();
-    // Ô¤ÀÀ½öÕ¹Ê¾Í·²¿×Ö¶ÎÇø£¨33 ×Ö½Ú£©£»CRC8 Óë¹Ì¼ş³¤¶ÈÔÚ´ò°üÊ±°´¹Ì¼şÄÚÈİ×Ô¶¯¼ÆËã
+    // é¢„è§ˆä»…å±•ç¤ºå¤´éƒ¨å­—æ®µåŒºï¼ˆ33 å­—èŠ‚ï¼‰ï¼›CRC8 ä¸å›ºä»¶é•¿åº¦åœ¨æ‰“åŒ…æ—¶æŒ‰å›ºä»¶å†…å®¹è‡ªåŠ¨è®¡ç®—
     const h = buildHeader(p.magic, p.model, p.fw, p.hw, null);
     const fields = h.slice(0, HEADER_FIELD_SIZE);
     const hex = hexDump(fields);
@@ -481,7 +481,7 @@
     headerPreview.innerHTML =
       '<div>' + hex + '</div>' +
       '<div class="ascii">' + ascii + '</div>' +
-      '<div class="ascii" style="margin-top:4px;">byte0 = ¹Ì¼şCRC8¡¢byte29-32 = 4×Ö½Ú´ó¶Ë¹Ì¼ş³¤¶È£¨´ò°üÊ±×Ô¶¯¼ÆËã£©£¬byte33-255 = 0xFF Ìî³ä</div>';
+      '<div class="ascii" style="margin-top:4px;">byte0 = å›ºä»¶CRC8ã€byte29-32 = 4å­—èŠ‚å¤§ç«¯å›ºä»¶é•¿åº¦ï¼ˆæ‰“åŒ…æ—¶è‡ªåŠ¨è®¡ç®—ï¼‰ï¼Œbyte33-255 = 0xFF å¡«å……</div>';
   }
 
   ['magic', 'model', 'fw', 'hw'].forEach(id => {
@@ -489,10 +489,10 @@
     $(id).addEventListener('change', renderHeaderPreview);
   });
 
-  // ============ ÎÄ¼şÁĞ±íäÖÈ¾ ============
+  // ============ æ–‡ä»¶åˆ—è¡¨æ¸²æŸ“ ============
   function renderFileList() {
     if (files.length === 0) {
-      fileList.innerHTML = '<div class="empty-tip">ÔİÎŞÎÄ¼ş£¬ÇëÏÈÍÏÈë»òÑ¡Ôñ bin ÎÄ¼ş</div>';
+      fileList.innerHTML = '<div class="empty-tip">æš‚æ— æ–‡ä»¶ï¼Œè¯·å…ˆæ‹–å…¥æˆ–é€‰æ‹© bin æ–‡ä»¶</div>';
       return;
     }
     fileList.innerHTML = '';
@@ -502,19 +502,19 @@
       item.className = 'file-item';
 
       const badge = packed
-        ? '<span class="file-badge badge-packed">ÒÑ´ò°ü</span>'
-        : '<span class="file-badge badge-raw">Ô­Ê¼¹Ì¼ş</span>';
+        ? '<span class="file-badge badge-packed">å·²æ‰“åŒ…</span>'
+        : '<span class="file-badge badge-raw">åŸå§‹å›ºä»¶</span>';
 
-      let sub = '´óĞ¡£º' + formatSize(f.size);
+      let sub = 'å¤§å°ï¼š' + formatSize(f.size);
 
       if (packed) {
-        sub += ' ¡¤ ·ÖÇø£º' + packed.magic + ' ¡¤ ĞÍºÅ£º' + packed.model +
-          ' ¡¤ ' + packed.fw + ' ¡¤ ' + packed.hw +
-          ' ¡¤ ¹Ì¼ş³¤¶È£º' + packed.fwLen +
-          ' ¡¤ Í·CRC8£º0x' + packed.crc8.toString(16).toUpperCase().padStart(2, '0');
+        sub += ' Â· åˆ†åŒºï¼š' + packed.magic + ' Â· å‹å·ï¼š' + packed.model +
+          ' Â· ' + packed.fw + ' Â· ' + packed.hw +
+          ' Â· å›ºä»¶é•¿åº¦ï¼š' + packed.fwLen +
+          ' Â· å¤´CRC8ï¼š0x' + packed.crc8.toString(16).toUpperCase().padStart(2, '0');
       } else {
-        // Ô­Ê¼¹Ì¼ş£ºÏÔÊ¾ÆäÊı¾İµÄ CRC8£¨´ò°üÊ±½«Ğ´ÈëÍ·²¿ byte0£©
-        sub += ' ¡¤ ¹Ì¼şCRC8£º0x' + crc8(f.data, Math.floor(f.data.length / 4) * 4).toString(16).toUpperCase().padStart(2, '0');
+        // åŸå§‹å›ºä»¶ï¼šæ˜¾ç¤ºå…¶æ•°æ®çš„ CRC8ï¼ˆæ‰“åŒ…æ—¶å°†å†™å…¥å¤´éƒ¨ byte0ï¼‰
+        sub += ' Â· å›ºä»¶CRC8ï¼š0x' + crc8(f.data, Math.floor(f.data.length / 4) * 4).toString(16).toUpperCase().padStart(2, '0');
       }
 
       item.innerHTML =
@@ -524,7 +524,7 @@
           '<div class="file-sub">' + badge + sub + '</div>' +
         '</div>' +
         '<div class="file-actions">' +
-          '<button class="btn-primary btn-sm" data-action="pack" data-id="' + f.id + '">´ò°ü</button>' +
+          '<button class="btn-primary btn-sm" data-action="pack" data-id="' + f.id + '">æ‰“åŒ…</button>' +
         '</div>';
 
       fileList.appendChild(item);
@@ -537,12 +537,12 @@
     }[c]));
   }
 
-  // ============ Ìí¼ÓÎÄ¼ş ============
+  // ============ æ·»åŠ æ–‡ä»¶ ============
   function addFiles(fileObjList) {
     let added = 0;
     Array.from(fileObjList).forEach(f => {
       if (!/\.bin$/i.test(f.name)) {
-        toast('ÒÑÌø¹ı·Ç .bin ÎÄ¼ş£º' + f.name, 'error');
+        toast('å·²è·³è¿‡é .bin æ–‡ä»¶ï¼š' + f.name, 'error');
         return;
       }
       const reader = new FileReader();
@@ -555,11 +555,11 @@
       reader.readAsArrayBuffer(f);
       added++;
     });
-    if (added > 0) toast('ÒÑÌí¼Ó ' + added + ' ¸öÎÄ¼ş', 'success');
+    if (added > 0) toast('å·²æ·»åŠ  ' + added + ' ä¸ªæ–‡ä»¶', 'success');
   }
 
-  // ============ ´ò°ü / ½â°ü ============
-  // ×Ô¶¨ÒåÊä³öÎÄ¼şÃû£¨ÇåÏ´ÎÄ¼şÃû·Ç·¨×Ö·û£¬È¥µôÎóÊäÈëµÄ .bin ºó×º£©£»Áô¿Õ·µ»Ø¿Õ´®
+  // ============ æ‰“åŒ… / è§£åŒ… ============
+  // è‡ªå®šä¹‰è¾“å‡ºæ–‡ä»¶åï¼ˆæ¸…æ´—æ–‡ä»¶åéæ³•å­—ç¬¦ï¼Œå»æ‰è¯¯è¾“å…¥çš„ .bin åç¼€ï¼‰ï¼›ç•™ç©ºè¿”å›ç©ºä¸²
   function getOutBaseName() {
     let n = $('outName').value.trim();
     if (!n) return '';
@@ -570,14 +570,14 @@
 
   function packFile(f, seq) {
     const p = getParams();
-    if (!p.fw || !p.hw) { toast('¹Ì¼ş°æ±¾ / Ó²¼ş°æ±¾²»ÄÜÎª¿Õ', 'error'); return null; }
-    // ÒÑ´ò°üÎÄ¼şÏÈ°şÀë¾ÉÍ·£¬ÔÙ°´µ±Ç°²ÎÊıÖØĞÂ´ò°ü
+    if (!p.fw || !p.hw) { toast('å›ºä»¶ç‰ˆæœ¬ / ç¡¬ä»¶ç‰ˆæœ¬ä¸èƒ½ä¸ºç©º', 'error'); return null; }
+    // å·²æ‰“åŒ…æ–‡ä»¶å…ˆå‰¥ç¦»æ—§å¤´ï¼Œå†æŒ‰å½“å‰å‚æ•°é‡æ–°æ‰“åŒ…
     const raw = parseHeader(f.data) ? f.data.slice(HEADER_SIZE) : f.data;
     const header = buildHeader(p.magic, p.model, p.fw, p.hw, raw);
     const out = new Uint8Array(HEADER_SIZE + raw.length);
     out.set(header, 0);
     out.set(raw, HEADER_SIZE);
-    // ×Ô¶¨ÒåÃüÃû£ºµ¥ÎÄ¼şÊä³ö Ãû.bin£¬ÅúÁ¿Êä³ö Ãû_ĞòºÅ.bin£¨·À¸²¸Ç£©£»Áô¿Õ°´Ô­ÎÄ¼şÃûÊä³ö
+    // è‡ªå®šä¹‰å‘½åï¼šå•æ–‡ä»¶è¾“å‡º å.binï¼Œæ‰¹é‡è¾“å‡º å_åºå·.binï¼ˆé˜²è¦†ç›–ï¼‰ï¼›ç•™ç©ºæŒ‰åŸæ–‡ä»¶åè¾“å‡º
     const custom = getOutBaseName();
     const outName = custom
       ? custom + (seq ? '_' + seq : '') + '.bin'
@@ -589,7 +589,7 @@
     return name.replace(/\.bin$/i, '');
   }
 
-  // ============ ±£´æÎÄ¼ş ============
+  // ============ ä¿å­˜æ–‡ä»¶ ============
   async function saveFile(name, data) {
     if (outputDirHandle && 'getFileHandle' in outputDirHandle) {
       try {
@@ -603,7 +603,7 @@
         return false;
       }
     }
-    // »ØÍË£ºä¯ÀÀÆ÷ÏÂÔØ
+    // å›é€€ï¼šæµè§ˆå™¨ä¸‹è½½
     const blob = new Blob([data], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -616,7 +616,7 @@
     return true;
   }
 
-  // ============ ÊÂ¼ş°ó¶¨ ============
+  // ============ äº‹ä»¶ç»‘å®š ============
   dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
   dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
   dropzone.addEventListener('drop', (e) => {
@@ -640,44 +640,44 @@
       const r = packFile(f);
       if (!r) return;
       const ok = await saveFile(r.outName, r.out);
-      if (ok) toast('´ò°ü³É¹¦£º' + r.outName, 'success');
-      else toast('±£´æÊ§°Ü£º' + r.outName, 'error');
+      if (ok) toast('æ‰“åŒ…æˆåŠŸï¼š' + r.outName, 'success');
+      else toast('ä¿å­˜å¤±è´¥ï¼š' + r.outName, 'error');
     }
   });
 
   $('btnPackAll').addEventListener('click', async () => {
-    if (files.length === 0) { toast('ÇëÏÈÌí¼Ó bin ÎÄ¼ş', 'info'); return; }
+    if (files.length === 0) { toast('è¯·å…ˆæ·»åŠ  bin æ–‡ä»¶', 'info'); return; }
     let okCount = 0;
     for (let i = 0; i < files.length; i++) {
-      // ¶àÎÄ¼şÊ±Êä³ö Ãû_ĞòºÅ.bin ÒÔ·À¸²¸Ç
+      // å¤šæ–‡ä»¶æ—¶è¾“å‡º å_åºå·.bin ä»¥é˜²è¦†ç›–
       const r = packFile(files[i], files.length > 1 ? i + 1 : undefined);
       if (!r) continue;
       if (await saveFile(r.outName, r.out)) okCount++;
     }
-    toast('ÅúÁ¿´ò°üÍê³É£º³É¹¦ ' + okCount + ' / ' + files.length, okCount === files.length ? 'success' : 'error');
+    toast('æ‰¹é‡æ‰“åŒ…å®Œæˆï¼šæˆåŠŸ ' + okCount + ' / ' + files.length, okCount === files.length ? 'success' : 'error');
   });
 
   $('btnClear').addEventListener('click', () => {
     files.length = 0;
     renderFileList();
-    toast('ÒÑÇå¿ÕÎÄ¼şÁĞ±í', 'info');
+    toast('å·²æ¸…ç©ºæ–‡ä»¶åˆ—è¡¨', 'info');
   });
 
   $('btnSelectDir').addEventListener('click', async () => {
     if (!('showDirectoryPicker' in window)) {
-      toast('µ±Ç°ä¯ÀÀÆ÷²»Ö§³ÖÄ¿Â¼Ñ¡Ôñ£¬½«Ê¹ÓÃä¯ÀÀÆ÷ÏÂÔØ', 'info');
+      toast('å½“å‰æµè§ˆå™¨ä¸æ”¯æŒç›®å½•é€‰æ‹©ï¼Œå°†ä½¿ç”¨æµè§ˆå™¨ä¸‹è½½', 'info');
       outputDirHandle = null;
-      dirLabel.textContent = 'ÉĞÎ´Ñ¡ÔñÄ¿Â¼£¨½«Ê¹ÓÃä¯ÀÀÆ÷ÏÂÔØ£©';
+      dirLabel.textContent = 'å°šæœªé€‰æ‹©ç›®å½•ï¼ˆå°†ä½¿ç”¨æµè§ˆå™¨ä¸‹è½½ï¼‰';
       dirLabel.classList.add('empty');
       return;
     }
     try {
       outputDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-      dirLabel.textContent = 'Êä³öÄ¿Â¼£º' + outputDirHandle.name;
+      dirLabel.textContent = 'è¾“å‡ºç›®å½•ï¼š' + outputDirHandle.name;
       dirLabel.classList.remove('empty');
-      toast('ÒÑÑ¡ÔñÊä³öÄ¿Â¼£º' + outputDirHandle.name, 'success');
+      toast('å·²é€‰æ‹©è¾“å‡ºç›®å½•ï¼š' + outputDirHandle.name, 'success');
     } catch (e) {
-      // ÓÃ»§È¡Ïû
+      // ç”¨æˆ·å–æ¶ˆ
     }
   });
 
@@ -695,7 +695,7 @@
     }, 2600);
   }
 
-  // ³õÊ¼»¯
+  // åˆå§‹åŒ–
   renderHeaderPreview();
   renderFileList();
 })();
