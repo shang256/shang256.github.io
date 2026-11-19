@@ -3,24 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title> 生产上位机 - KM5S 协议 (Web版)</title>
+<title>  生产上位机 - KM5S 协议 (Web版)</title>
 <style>
   :root {
-    --bg: #f5f6f8;
+    --bg: #eef1f6;
     --panel: #ffffff;
-    --border: #dcdde1;
-    --text: #2c3e50;
-    --muted: #7f8c8d;
-    --accent: #1a73e8;
-    --accent-dark: #1557b0;
-    --green: #1b5e20;
-    --red: #c62828;
-    --orange: #e67e22;
+    --border: #e2e6ee;
+    --text: #1f2a3d;
+    --muted: #6b7686;
+    --accent: #2563eb;
+    --accent-dark: #1d4ed8;
+    --accent-light: #eff4ff;
+    --green: #16a34a;
+    --red: #dc2626;
+    --orange: #d97706;
+    --shadow-sm: 0 1px 2px rgba(16, 24, 40, .06);
+    --shadow: 0 4px 14px rgba(16, 24, 40, .08);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
   body {
-    font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", sans-serif;
+    font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", "PingFang SC", sans-serif;
     font-size: 13px;
     color: var(--text);
     background: var(--bg);
@@ -29,78 +32,104 @@
     height: 100vh;
     overflow: hidden;
   }
-  header { flex: 0 0 auto; background: var(--panel); border-bottom: 1px solid var(--border); padding: 8px 12px; }
+  header {
+    flex: 0 0 auto; background: linear-gradient(180deg, #ffffff, #fbfcfe);
+    border-bottom: 1px solid var(--border); padding: 10px 16px; box-shadow: var(--shadow-sm);
+  }
   .row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-  .row + .row { margin-top: 6px; }
-  .title { font-size: 15px; font-weight: 700; margin-right: 6px; }
-  .sub { color: var(--muted); font-size: 12px; margin-right: 10px; }
-  label { color: var(--muted); }
-  select, input[type=text], input[type=number] {
-    border: 1px solid var(--border); border-radius: 4px; padding: 4px 6px;
-    font: inherit; color: var(--text); background: #fff;
+  .row + .row { margin-top: 8px; }
+  .title {
+    font-size: 16px; font-weight: 800; margin-right: 6px; letter-spacing: .3px;
+    background: linear-gradient(120deg, var(--accent), #7c3aed);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   }
+  .sub { color: var(--muted); font-size: 12px; margin-right: 12px; }
+  label { color: var(--muted); font-weight: 500; }
+  select, input[type=text], input[type=number], textarea {
+    border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px;
+    font: inherit; color: var(--text); background: #fff; transition: border-color .15s, box-shadow .15s;
+  }
+  select:focus, input:focus, textarea:focus {
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+  }
+  input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
   button {
-    border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px;
+    border: 1px solid var(--border); border-radius: 6px; padding: 5px 14px;
     background: #fff; color: var(--text); cursor: pointer; font: inherit;
-    transition: background .15s, border-color .15s;
+    transition: background .15s, border-color .15s, box-shadow .15s, transform .1s;
   }
-  button:hover { background: #f0f2f5; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  button.primary:hover { background: var(--accent-dark); }
-  button.danger:hover { background: #fdecea; border-color: var(--red); color: var(--red); }
-  button.small { padding: 3px 8px; font-size: 12px; }
-  .status { font-weight: 600; }
-  .status.ok { color: var(--green); }
-  .status.off { color: var(--red); }
+  button:hover { background: #f2f4f8; border-color: #cdd4e0; }
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.primary {
+    background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+    border-color: var(--accent); color: #fff; box-shadow: 0 2px 6px rgba(37, 99, 235, .3);
+  }
+  button.primary:hover { background: linear-gradient(180deg, #2f6ff0, #1d4ed8); box-shadow: 0 3px 9px rgba(37, 99, 235, .35); }
+  button.danger:hover { background: #fef2f2; border-color: var(--red); color: var(--red); }
+  button.small { padding: 3px 9px; font-size: 12px; }
+  #conn-status { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+  #conn-status::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: #9ca3af; }
+  #conn-status.ok::before { background: var(--green); box-shadow: 0 0 0 3px rgba(22, 163, 74, .16); }
+  #conn-status.off::before { background: var(--red); box-shadow: 0 0 0 3px rgba(220, 38, 38, .14); }
+  #conn-status.ok { color: var(--green); }
+  #conn-status.off { color: var(--red); }
   .summary { color: var(--green); font-weight: 600; margin-left: auto; }
-  .chk { display: inline-flex; align-items: center; gap: 4px; color: var(--text); }
+  .chk { display: inline-flex; align-items: center; gap: 5px; color: var(--text); cursor: pointer; }
 
-  nav { flex: 0 0 auto; display: flex; background: var(--panel); border-bottom: 1px solid var(--border); padding: 0 8px; gap: 2px; }
+  nav { flex: 0 0 auto; display: flex; background: var(--panel); border-bottom: 1px solid var(--border); padding: 0 10px; gap: 2px; }
   nav button {
-    border: none; background: transparent; border-bottom: 3px solid transparent;
-    padding: 10px 18px; font-size: 13.5px; border-radius: 0; color: var(--muted);
+    position: relative; border: none; background: transparent; padding: 12px 18px;
+    font-size: 13.5px; border-radius: 8px 8px 0 0; color: var(--muted); transition: color .15s, background .15s;
   }
-  nav button:hover { background: #f0f2f5; }
-  nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  nav button::after {
+    content: ''; position: absolute; left: 18px; right: 18px; bottom: 0; height: 3px;
+    background: var(--accent); border-radius: 3px 3px 0 0; transform: scaleX(0); transition: transform .2s;
+  }
+  nav button:hover { background: #f4f6fa; color: var(--text); }
+  nav button.active { color: var(--accent); font-weight: 700; background: var(--accent-light); }
+  nav button.active::after { transform: scaleX(1); }
 
   main { flex: 1 1 auto; min-height: 0; position: relative; }
-  main section { display: none; position: absolute; inset: 0; padding: 12px; overflow: auto; background: var(--bg); }
+  main section { display: none; position: absolute; inset: 0; padding: 14px; overflow: auto; background: var(--bg); }
   main section.active { display: block; }
 
   .card {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
-    padding: 12px; margin-bottom: 12px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; margin-bottom: 14px; box-shadow: var(--shadow-sm);
   }
-  .card h3 { margin: 0 0 8px; font-size: 13.5px; }
+  .card h3 { margin: 0 0 10px; font-size: 14px; padding-left: 9px; border-left: 4px solid var(--accent); }
   .tip { color: var(--muted); font-size: 12px; }
 
-  table.grid { width: 100%; border-collapse: collapse; background: #fff; }
-  table.grid th, table.grid td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; }
-  table.grid th { background: #f7f8fa; font-weight: 600; }
+  table.grid { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; border-radius: 8px; overflow: hidden; }
+  table.grid th, table.grid td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; }
+  table.grid th { background: #f6f8fb; font-weight: 700; color: #475467; }
   table.grid td.val { word-break: break-all; }
-  td.status-done { color: var(--green); }
-  td.status-err { color: var(--red); }
-  td.status-wait { color: var(--orange); }
+  table.grid tr:nth-child(even) { background: #fafbfd; }
+  table.grid tr:not(:first-child):hover td { background: var(--accent-light); }
+  td.status-done { color: var(--green); font-weight: 600; }
+  td.status-err { color: var(--red); font-weight: 600; }
+  td.status-wait { color: var(--orange); font-weight: 600; }
 
-  .grid-cols { display: grid; gap: 10px; }
+  .grid-cols { display: grid; gap: 12px; }
   .cols-3 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
   .cols-2 { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
 
   .field { display: grid; grid-template-columns: 150px 1fr auto; gap: 8px; align-items: center; padding: 4px 0; }
-  .field label.lbl { text-align: right; color: var(--text); }
+  .field label.lbl { text-align: right; color: var(--text); font-weight: 500; }
   .field .tip { grid-column: 3; }
 
-  .btnrow { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .btnrow { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
 
   footer {
     flex: 0 0 auto; background: var(--panel); border-top: 1px solid var(--border);
-    padding: 6px 12px; min-height: 140px; height: 26vh; resize: vertical; overflow: hidden;
-    display: flex; flex-direction: column;
+    padding: 8px 12px; min-height: 140px; height: 26vh; resize: vertical; overflow: hidden;
+    display: flex; flex-direction: column; box-shadow: 0 -2px 8px rgba(16, 24, 40, .04);
   }
   #log {
     flex: 1 1 auto; min-height: 0; overflow: auto; background: #1e1f22; color: #d7d9dd;
-    font-family: Consolas, "Courier New", monospace; font-size: 12px;
-    border-radius: 6px; padding: 8px; white-space: pre-wrap; word-break: break-all;
+    font-family: Consolas, "Courier New", monospace; font-size: 12px; line-height: 1.6;
+    border-radius: 8px; padding: 10px; white-space: pre-wrap; word-break: break-all;
   }
   #log .t-TX { color: #6cb6ff; }
   #log .t-RX { color: #7ee2a8; }
@@ -108,19 +137,24 @@
   #log .t-WARN { color: #ffb86b; }
   #log .t-INFO { color: #b8c0cc; }
 
-  pre.help { font-family: Consolas, "Courier New", monospace; font-size: 12px; white-space: pre-wrap; line-height: 1.5; }
+  pre.help { font-family: Consolas, "Courier New", monospace; font-size: 12px; white-space: pre-wrap; line-height: 1.6; color: #374151; }
   .mono { font-family: Consolas, "Courier New", monospace; }
 
-  .color-btn { width: 88px; }
-  .custom-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
-  .custom-row > label { min-width: 96px; text-align: right; }
+  .color-btn { width: 92px; }
+  .custom-row { display: flex; align-items: center; gap: 8px; margin: 9px 0; }
+  .custom-row > label { min-width: 96px; text-align: right; font-weight: 500; }
   .badge { color: var(--muted); }
+
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: #c3c9d4; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #a7b0bf; }
+  ::-webkit-scrollbar-track { background: transparent; }
 </style>
 </head>
 <body>
 <header>
   <div class="row">
-    <span class="title"> 生产上位机</span>
+    <span class="title">  生产上位机</span>
     <span class="sub">KM5S 串口协议 · Web Serial 版</span>
     <label>串口:</label>
     <select id="port-sel" style="min-width:180px"></select>
@@ -808,6 +842,7 @@ async function pickAndConnect(){
 }
 
 async function connect(specificPort){
+  if (specificPort && typeof specificPort.open !== 'function') specificPort = undefined;
   if (port){ await disconnect(); }
   let p = specificPort || null;
   if (!p){
@@ -1464,7 +1499,7 @@ function init(){
   buildParamForm();
   buildTestPage();
 
-  document.getElementById('btn-connect').onclick = connect;
+  document.getElementById('btn-connect').onclick = () => connect();
   document.getElementById('btn-disconnect').onclick = disconnect;
   document.getElementById('btn-refresh').onclick = pickAndConnect;
   // 点击串口下拉框时弹出系统串口选择框, 重新选择串口并自动连接
