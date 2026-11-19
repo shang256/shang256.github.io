@@ -1,334 +1,1621 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5S数据处理工具</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
-            color: #fff;
-        }
-        .container {
-            width: 100%;
-            max-width: 800px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        .description {
-            text-align: center;
-            margin-bottom: 30px;
-            line-height: 1.6;
-            font-size: 1.1rem;
-        }
-        .input-group {
-            margin-bottom: 25px;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            font-size: 1.2rem;
-        }
-        input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            color: white;
-            font-size: 1.1rem;
-            transition: border-color 0.3s;
-        }
-        input:focus {
-            outline: none;
-            border-color: #4dabf7;
-        }
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 1.2rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-bottom: 25px;
-        }
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
-        }
-        .btn:active {
-            transform: translateY(0);
-        }
-        .result-group {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        .result-title {
-            font-weight: 600;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-            color: #4facfe;
-        }
-        .result-content {
-            font-family: monospace;
-            font-size: 1.3rem;
-            word-break: break-all;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            min-height: 50px;
-            margin-bottom: 15px;
-        }
-        .copy-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 20px;
-            background: linear-gradient(to right, #00b09b, #96c93d);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .copy-btn:hover {
-            background: linear-gradient(to right, #009174, #82b434);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .copy-btn i {
-            margin-right: 8px;
-        }
-        .explanation {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        .explanation h3 {
-            margin-bottom: 15px;
-            color: #4facfe;
-        }
-        .explanation p {
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        .explanation ul {
-            padding-left: 20px;
-            margin-bottom: 10px;
-        }
-        .explanation li {
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-        .highlight {
-            color: #ffd43b;
-            font-weight: 600;
-        }
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #4CAF50;
-            color: white;
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 1000;
-        }
-        .toast.show {
-            opacity: 1;
-        }
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2rem;
-            }
-            .container {
-                padding: 20px;
-            }
-            .result-content {
-                font-size: 1.1rem;
-            }
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title> 生产上位机 - KM5S 协议 (Web版)</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --border: #dcdde1;
+    --text: #2c3e50;
+    --muted: #7f8c8d;
+    --accent: #1a73e8;
+    --accent-dark: #1557b0;
+    --green: #1b5e20;
+    --red: #c62828;
+    --orange: #e67e22;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  header { flex: 0 0 auto; background: var(--panel); border-bottom: 1px solid var(--border); padding: 8px 12px; }
+  .row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .row + .row { margin-top: 6px; }
+  .title { font-size: 15px; font-weight: 700; margin-right: 6px; }
+  .sub { color: var(--muted); font-size: 12px; margin-right: 10px; }
+  label { color: var(--muted); }
+  select, input[type=text], input[type=number] {
+    border: 1px solid var(--border); border-radius: 4px; padding: 4px 6px;
+    font: inherit; color: var(--text); background: #fff;
+  }
+  button {
+    border: 1px solid var(--border); border-radius: 4px; padding: 5px 12px;
+    background: #fff; color: var(--text); cursor: pointer; font: inherit;
+    transition: background .15s, border-color .15s;
+  }
+  button:hover { background: #f0f2f5; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: var(--accent-dark); }
+  button.danger:hover { background: #fdecea; border-color: var(--red); color: var(--red); }
+  button.small { padding: 3px 8px; font-size: 12px; }
+  .status { font-weight: 600; }
+  .status.ok { color: var(--green); }
+  .status.off { color: var(--red); }
+  .summary { color: var(--green); font-weight: 600; margin-left: auto; }
+  .chk { display: inline-flex; align-items: center; gap: 4px; color: var(--text); }
+
+  nav { flex: 0 0 auto; display: flex; background: var(--panel); border-bottom: 1px solid var(--border); padding: 0 8px; gap: 2px; }
+  nav button {
+    border: none; background: transparent; border-bottom: 3px solid transparent;
+    padding: 10px 18px; font-size: 13.5px; border-radius: 0; color: var(--muted);
+  }
+  nav button:hover { background: #f0f2f5; }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  main { flex: 1 1 auto; min-height: 0; position: relative; }
+  main section { display: none; position: absolute; inset: 0; padding: 12px; overflow: auto; background: var(--bg); }
+  main section.active { display: block; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; margin-bottom: 12px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 13.5px; }
+  .tip { color: var(--muted); font-size: 12px; }
+
+  table.grid { width: 100%; border-collapse: collapse; background: #fff; }
+  table.grid th, table.grid td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; }
+  table.grid th { background: #f7f8fa; font-weight: 600; }
+  table.grid td.val { word-break: break-all; }
+  td.status-done { color: var(--green); }
+  td.status-err { color: var(--red); }
+  td.status-wait { color: var(--orange); }
+
+  .grid-cols { display: grid; gap: 10px; }
+  .cols-3 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .cols-2 { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+
+  .field { display: grid; grid-template-columns: 150px 1fr auto; gap: 8px; align-items: center; padding: 4px 0; }
+  .field label.lbl { text-align: right; color: var(--text); }
+  .field .tip { grid-column: 3; }
+
+  .btnrow { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+  footer {
+    flex: 0 0 auto; background: var(--panel); border-top: 1px solid var(--border);
+    padding: 6px 12px; min-height: 140px; height: 26vh; resize: vertical; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  #log {
+    flex: 1 1 auto; min-height: 0; overflow: auto; background: #1e1f22; color: #d7d9dd;
+    font-family: Consolas, "Courier New", monospace; font-size: 12px;
+    border-radius: 6px; padding: 8px; white-space: pre-wrap; word-break: break-all;
+  }
+  #log .t-TX { color: #6cb6ff; }
+  #log .t-RX { color: #7ee2a8; }
+  #log .t-ERR { color: #ff7b72; }
+  #log .t-WARN { color: #ffb86b; }
+  #log .t-INFO { color: #b8c0cc; }
+
+  pre.help { font-family: Consolas, "Courier New", monospace; font-size: 12px; white-space: pre-wrap; line-height: 1.5; }
+  .mono { font-family: Consolas, "Courier New", monospace; }
+
+  .color-btn { width: 88px; }
+  .custom-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+  .custom-row > label { min-width: 96px; text-align: right; }
+  .badge { color: var(--muted); }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>5S数据处理工具</h1>
-        
-        <p class="description">输入十六进制数据（空格分隔），系统将计算累加和并生成完整数据包</p>
-        
-        <div class="input-group">
-            <label for="hexInput">输入十六进制数据：</label>
-            <input type="text" id="hexInput" placeholder="例如: 1A 52 07 00 2D 01 1C 4B C4 12" value="1A 52 07 00 2D 01 1C 4B C4 12">
-        </div>
-        
-        <button class="btn" id="processBtn">处理数据</button>
-        
-        <div class="result-group">
-            <div class="result-title">计算结果：</div>
-            <div class="result-content" id="checksumResult">等待计算...</div>
-        </div>
-        
-        <div class="result-group">
-            <div class="result-title">完整数据包：</div>
-            <div class="result-content" id="fullPacket">等待生成...</div>
-            <button class="copy-btn" id="copyBtn">
-                <i class="fas fa-copy"></i>复制数据
-            </button>
-        </div>
-        
-        <div class="explanation">
-            <h3>处理说明：</h3>
-            <p>此工具将：</p>
-            <ul>
-                <li>验证并解析输入的十六进制数据</li>
-                <li>计算所有字节的累加和（取低16位）</li>
-                <li>在头部添加起始符 <span class="highlight">3A</span></li>
-                <li>在尾部添加校验和（小端格式）和结束符 <span class="highlight">0D 0A</span></li>
-            </ul>
-            <p>示例：输入 "<span class="highlight">1A 52 07 00 2D 01 1C 4B C4 12</span>"</p>
-            <p>累加和 = 0x<span class="highlight">1DE</span> → 校验和 = <span class="highlight">DE 01</span>（小端格式）</p>
-            <p>结果：<span class="highlight">3A 1A 52 07 00 2D 01 1C 4B C4 12 DE 01 0D 0A</span></p>
-        </div>
+<header>
+  <div class="row">
+    <span class="title"> 生产上位机</span>
+    <span class="sub">KM5S 串口协议 · Web Serial 版</span>
+    <label>串口:</label>
+    <select id="port-sel" style="min-width:180px"></select>
+    <button id="btn-refresh" class="small" title="重新选择串口">刷新</button>
+    <button class="primary" id="btn-connect">连接串口</button>
+    <button id="btn-disconnect" disabled>断开</button>
+    <label style="margin-left:8px">波特率:</label>
+    <select id="baud">
+      <option value="9600" selected>9600</option>
+      <option value="19200">19200</option>
+      <option value="38400">38400</option>
+      <option value="57600">57600</option>
+      <option value="115200">115200</option>
+    </select>
+    <span id="conn-status" class="status off">未连接</span>
+    <span id="summary" class="summary">设备信息: 打开串口后自动读取版本信息</span>
+  </div>
+  <div class="row">
+    <label class="chk"><input type="checkbox" id="can-enable"> CAN小板(CAN链路透传)</label>
+    <label>波特率</label>
+    <select id="can-baud">
+      <option value="0">100K</option>
+      <option value="1" selected>125K</option>
+      <option value="2">150K</option>
+      <option value="3">200K</option>
+      <option value="4">250K</option>
+      <option value="5">300K</option>
+      <option value="6">400K</option>
+      <option value="7">500K</option>
+      <option value="8">600K</option>
+      <option value="9">800K</option>
+    </select>
+    <label>报文</label>
+    <select id="can-frame">
+      <option value="0" selected>标准帧</option>
+      <option value="1">扩展帧</option>
+    </select>
+    <button class="small" id="btn-can-apply">应用CAN设置</button>
+    <label class="chk"><input type="checkbox" id="auto-reply" checked> 自动应答0x53</label>
+    <label class="chk"><input type="checkbox" id="hex-log" checked> 显示原始HEX</label>
+    <label class="chk"><input type="checkbox" id="auto-scroll" checked> 自动滚动</label>
+    <span class="badge" id="count">TX 0 / RX 0</span>
+  </div>
+</header>
+
+<nav id="tabs">
+  <button data-tab="info" class="active">设备信息</button>
+  <button data-tab="lcd">显示控制</button>
+  <button data-tab="param">参数读写</button>
+  <button data-tab="test">生产测试</button>
+  <button data-tab="monitor">协议监视</button>
+  <button data-tab="custom">自定义下发</button>
+  <button data-tab="help">协议说明</button>
+</nav>
+
+<main>
+  <section id="tab-info" class="active">
+    <div class="card">
+      <div class="btnrow">
+        <button id="btn-scan-all" class="primary">重新读取全部</button>
+        <button id="btn-scan-ver">只读版本</button>
+        <button id="btn-scan-test">只读测试项</button>
+        <span id="scan-var" class="tip">未扫描</span>
+      </div>
     </div>
-    
-    <div class="footer">
-        <p>© 数据处理工具 | 设计用于通信协议数据包生成</p>
+    <div class="card">
+      <h3>版本信息 (0xA9)</h3>
+      <table class="grid" id="ver-table"></table>
     </div>
+    <div class="card">
+      <h3>测试信息</h3>
+      <table class="grid" id="test-table"></table>
+    </div>
+    <div class="card tip">
+      说明: 打开串口后默认只读版本信息, 测试项请点上方按钮读取; 按键检测需人工配合, 时钟检测固件无应答, FindMy 应答延时 1~2s 属正常
+    </div>
+  </section>
 
-    <div class="toast" id="toast">数据已复制到剪贴板！</div>
+  <section id="tab-lcd">
+    <div class="card">
+      <h3>0xAA LCD 颜色显示控制</h3>
+      <div class="tip" style="margin-bottom:8px">下发即生效: 仪表立即整屏填充对应颜色并打开背光 (lcd.c: LCD_ColorControl)</div>
+      <div class="btnrow" id="lcd-colors"></div>
+    </div>
+    <div class="card">
+      <div class="btnrow">
+        <button id="btn-lcd-cycle">开始循环</button>
+        <button id="btn-lcd-exit">退出显示测试</button>
+      </div>
+      <div class="tip" style="margin-top:8px">自动颜色循环 (红->绿->蓝->白->黑, 每 1s 一色); 收到 0xAA 应答后仪表停留在该颜色, 需断电重启或长按电源键退出测试态</div>
+    </div>
+  </section>
 
-    <script>
-        document.getElementById('processBtn').addEventListener('click', function() {
-            // 获取输入值
-            const input = document.getElementById('hexInput').value.trim();
-            
-            // 验证输入
-            if (!input) {
-                alert('请输入十六进制数据！');
-                return;
-            }
-            
-            // 分割输入并验证每个十六进制数
-            const hexArray = input.split(/\s+/);
-            const values = [];
-            
-            for (let hex of hexArray) {
-                // 确保是有效的十六进制数
-                if (!/^[0-9A-Fa-f]{1,2}$/.test(hex)) {
-                    alert(`无效的十六进制数: ${hex}`);
-                    return;
-                }
-                
-                // 将十六进制字符串转换为数值
-                values.push(parseInt(hex, 16));
-            }
-            
-            // 计算累加和
-            let checksum = 0;
-            for (let value of values) {
-                checksum += value;
-            }
-            
-            // 取低16位
-            checksum = checksum & 0xFFFF;
-            
-            // 显示累加和
-            document.getElementById('checksumResult').textContent = `0x${checksum.toString(16).toUpperCase()}`;
-            
-            // 构建完整数据包
-            // 起始符
-            let result = '3A';
-            
-            // 添加原始数据
-            for (let value of values) {
-                result += ' ' + value.toString(16).padStart(2, '0').toUpperCase();
-            }
-            
-            // 添加校验和（小端格式：低字节在前，高字节在后）
-            const lowByte = checksum & 0xFF;
-            const highByte = (checksum >> 8) & 0xFF;
-            result += ' ' + lowByte.toString(16).padStart(2, '0').toUpperCase();
-            result += ' ' + highByte.toString(16).padStart(2, '0').toUpperCase();
-            
-            // 添加结束符
-            result += ' 0D 0A';
-            
-            // 显示结果
-            document.getElementById('fullPacket').textContent = result;
-        });
+  <section id="tab-param">
+    <div class="card">
+      <div class="btnrow">
+        <button id="btn-param-read" class="primary">读取参数 (0xC2)</button>
+        <button id="btn-param-write">写入参数 (0xC0)</button>
+        <button id="btn-param-default">填入默认值</button>
+        <span class="tip">写参数会把整包 54 字节下发并写入仪表出厂区</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="grid-cols cols-3" id="param-form"></div>
+    </div>
+  </section>
 
-        // 复制功能
-        document.getElementById('copyBtn').addEventListener('click', function() {
-            const textToCopy = document.getElementById('fullPacket').textContent;
-            
-            if (textToCopy === '等待生成...') {
-                alert('请先生成数据包！');
-                return;
-            }
-            
-            // 使用Clipboard API复制文本
-            navigator.clipboard.writeText(textToCopy).then(function() {
-                // 显示成功提示
-                const toast = document.getElementById('toast');
-                toast.textContent = '数据已复制到剪贴板！';
-                toast.classList.add('show');
-                
-                // 2秒后隐藏提示
-                setTimeout(function() {
-                    toast.classList.remove('show');
-                }, 2000);
-            }).catch(function(err) {
-                console.error('复制失败: ', err);
-                alert('复制失败，请手动复制文本。');
-            });
-        });
+  <section id="tab-test">
+    <div class="grid-cols cols-3" id="test-groups"></div>
+  </section>
 
-        // 初始加载时处理示例数据
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('processBtn').click();
-        });
-    </script>
+  <section id="tab-monitor">
+    <div class="grid-cols cols-2">
+      <div class="card">
+        <h3>最近一次 0x53 配置参数 (仪表->控制器)</h3>
+        <pre class="help" id="mon-cfg">暂无数据</pre>
+      </div>
+      <div class="card">
+        <h3>最近一次 0x52 运行参数</h3>
+        <pre class="help" id="mon-run">暂无数据</pre>
+      </div>
+    </div>
+    <div class="card">
+      <h3>统计</h3>
+      <div id="mon-stat">TX 0 帧 / RX 0 帧</div>
+      <button id="btn-reset-stat" style="margin-top:8px">清零统计</button>
+    </div>
+  </section>
+
+  <section id="tab-custom">
+    <div class="card">
+      <h3>自定义下发 (自动组包)</h3>
+      <div class="tip" style="margin-bottom:10px">
+        输入命令字 / 数据长度 / 数据(HEX), 点「下发」后自动组包: 3A 1A 命令字 数据长度 数据 校验L 校验H 0D 0A
+      </div>
+      <div class="custom-row">
+        <label>命令字 (HEX):</label>
+        <input type="text" id="custom-cmd" placeholder="如 C0 或 0xC0" style="width:120px" class="mono">
+        <select id="custom-cmd-sel"><option value="">-- 常用命令 --</option></select>
+      </div>
+      <div class="custom-row">
+        <label>数据长度:</label>
+        <input type="number" id="custom-len" placeholder="留空=自动" style="width:120px">
+        <span class="tip">十进制, 数据字节个数; 留空按数据自动计算</span>
+      </div>
+      <div class="custom-row">
+        <label>数据 (HEX):</label>
+        <textarea id="custom-data" rows="3" class="mono" placeholder="如 01 02 03 或 010203 或 0x01 0x02"
+                  style="flex:1;font:inherit;border:1px solid var(--border);border-radius:4px;padding:6px"></textarea>
+      </div>
+      <div class="custom-row">
+        <label>组包预览:</label>
+        <code id="custom-preview" class="mono" style="color:#999">(输入命令字后显示)</code>
+      </div>
+      <div class="btnrow" style="margin-top:10px">
+        <button id="btn-custom-send" class="primary">下发</button>
+        <button id="btn-custom-clear">清空</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-help">
+    <div class="card"><pre class="help" id="help-text"></pre></div>
+  </section>
+</main>
+
+<footer>
+  <div class="btnrow" style="margin-bottom:4px">
+    <button class="small" id="btn-clear-log">清空</button>
+    <button class="small" id="btn-save-log">保存日志</button>
+  </div>
+  <div id="log"></div>
+</footer>
+
+<script>
+"use strict";
+
+/* ============================================================
+ * 协议常量
+ * ============================================================ */
+const FRAME_HEAD = 0x3A, FRAME_ADDR = 0x1A;
+const LEN_MIN = 8, LEN_MAX = 150, LEN_MAX_DATA = LEN_MAX - LEN_MIN;
+
+const CMD = {
+  NULL: 0x00, HEARTBEAT_TEST: 0x01,
+  HMI_CTRL_RUN: 0x52, HMI_CTRL_PARAM_SET: 0x53, RST: 0x80,
+  WRITE_CONTROL_PARAM: 0xC0, WRITE_CONTROL_PARAM_RESULT: 0xC1,
+  READ_CONTROL_PARAM: 0xC2, READ_CONTROL_PARAM_REPORT: 0xC3,
+  FLAG_ARRAY_READ: 0xA6, FLAG_ARRAY_WRITE: 0xA7,
+  VERSION_TYPE_WRITE: 0xA8, VERSION_TYPE_READ: 0xA9,
+  TEST_LCD: 0xAA, PROTOCOL_SWITCH: 0xAB, AD_RATIO_REF: 0xAC,
+  KEY_CHECK_TEST: 0xAD, CLOCK_CHECK_TEST: 0xAE, SENSOR_CHECK_TEST: 0xAF,
+  BLUE_MACADDR_TEST: 0xB0, CLEAR_MILEAGE: 0xB5, USB_INSERT_TEST: 0xB7,
+  NFC_ID: 0xB9, NFC_BIND_OR_DELETE: 0xBA,
+  FINDMY_BEEP: 0xBC, FINDMY_WRITE_SN: 0xBD, FINDMY_READ_SN: 0xBE,
+  FLASH_CAPACITY_READ: 0xBF, RTC_WRITE: 0xC4, RTC_READ: 0xC5,
+  DUT_INFO_GET: 0xD6, PRODUCTION_TEST: 0xD8, CAN_PARAM_SET: 0xFF,
+};
+CMD.CLOCK_CHECK_TEST = 0xAE;
+
+const CMD_NAMES = {
+  0x01: "心跳查询 0x01", 0x52: "正常运行状态 0x52", 0x53: "参数设置 0x53", 0x80: "复位 0x80",
+  0xC0: "写控制器参数 0xC0", 0xC1: "写参数结果 0xC1", 0xC2: "读控制器参数 0xC2", 0xC3: "参数上报 0xC3",
+  0xA6: "读标志区 0xA6", 0xA7: "写标志区 0xA7", 0xA8: "写版本信息 0xA8", 0xA9: "读版本信息 0xA9",
+  0xAA: "LCD颜色控制 0xAA", 0xAB: "协议切换 0xAB", 0xAC: "AD校准值 0xAC", 0xAD: "按键检测 0xAD",
+  0xAE: "时钟检测 0xAE", 0xAF: "光敏检测 0xAF", 0xB0: "蓝牙MAC 0xB0", 0xB5: "清除里程 0xB5",
+  0xB7: "USB插入检测 0xB7", 0xB9: "NFC刷卡验证 0xB9", 0xBA: "NFC绑定/删除 0xBA",
+  0xBC: "FINDMY蜂鸣 0xBC", 0xBD: "FINDMY写SN 0xBD", 0xBE: "FINDMY读SN 0xBE",
+  0xBF: "FLASH容量 0xBF", 0xC4: "RTC写 0xC4", 0xC5: "RTC读 0xC5",
+  0xD6: "自采电压 0xD6", 0xD8: "产测命令 0xD8", 0xFF: "CAN小板参数设置 0xFF",
+};
+
+const LCD_COLORS = [[0,"红 (0)"],[1,"红 (1)"],[2,"绿 (2)"],[3,"蓝 (3)"],[4,"白 (4)"],[5,"黑 (5)"],[6,"黑 (6)"],[7,"黑 (7)"]];
+const LCD_AUTO_SEQUENCE = [0, 2, 3, 4, 5];
+
+const VERSION_TYPES = [
+  [0,"SN"],[1,"客户SN"],[2,"硬件版本"],[3,"BOOT版本"],[4,"APP版本"],
+  [5,"BLE升级标志"],[6,"BLE升级CRC"],[7,"二维码"],[8,"UI版本"],[9,"蓝牙固件版本"],
+];
+
+const KEY_BITS = [[0,"ADD"],[1,"KEYM"],[2,"DEC"],[3,"ADD_DEC"]];
+const RUN_STATUS_BITS = [[0,"超速"],[2,"巡航"],[4,"6km/h推行"],[5,"电池容量低"],[7,"大灯"]];
+
+const WHEEL_CODE_NAMES = {0:"16寸",1:"18寸",2:"20寸",3:"22寸",4:"24寸",5:"26寸",6:"700C/27.5",7:"28寸"};
+const PROTOCOL_NAMES = {0:"KM5S",1:"锂电2号",2:"八方V5.2",3:"J协议/大石V9.2"};
+
+const FLAG_NAMES = {0:"老化进入",1:"老化",2:"FCT",3:"半成品",4:"FQC",5:"打标",6:"OQC",7:"IPQC",8:"BLE",9:"UI升级"};
+
+const CAN_BAUD_RATES = [[0,"100K"],[1,"125K"],[2,"150K"],[3,"200K"],[4,"250K"],[5,"300K"],[6,"400K"],[7,"500K"],[8,"600K"],[9,"800K"]];
+const CAN_FRAME_TYPES = [[0,"标准帧"],[1,"扩展帧"]];
+const CAN_ACK_TIMEOUT_MS = 300;
+const CAN_CONFIG_GAP_MS = 50;
+
+const FINDMY_SN_LEN = 16;
+const FINDMY_TEST_SUBCMDS = [[0x22,"读FindMy版本"],[0x23,"FindMy复位"],[0x2C,"FindMy开机"],[0x2D,"FindMy关机"],[0x31,"恢复出厂"]];
+
+const TEST_ITEMS = [
+  ["hb","心跳查询 (0x01)",CMD.HEARTBEAT_TEST,[],"仪表链路在线状态"],
+  ["volt","自采电压 (0xD6)",CMD.DUT_INFO_GET,[],"仪表自采电池电压"],
+  ["usb","USB插入检测 (0xB7)",CMD.USB_INSERT_TEST,[],"USB 负载插入状态与电流"],
+  ["flash","FLASH容量 (0xBF)",CMD.FLASH_CAPACITY_READ,[],"外部 FLASH 容量"],
+  ["mac","蓝牙MAC (0xB0)",CMD.BLUE_MACADDR_TEST,[],"蓝牙模块地址"],
+  ["light","光敏检测 (0xAF)",CMD.SENSOR_CHECK_TEST,[],"光敏 ADC 原始值"],
+  ["rtc","RTC时间 (0xC5)",CMD.RTC_READ,[],"仪表实时时钟"],
+  ["ad","AD校准值 (0xAC)",CMD.AD_RATIO_REF,[0x00],"仪表自采电压校准值"],
+  ["flag","标志区 (0xA6)",CMD.FLAG_ARRAY_READ,[],"64 字节产线标志区"],
+  ["param","控制器参数 (0xC2)",CMD.READ_CONTROL_PARAM,[],"54 字节出厂参数"],
+  ["nfc","NFC刷卡验证 (0xB9)",CMD.NFC_ID,[],"刷NFC卡后上报 4 字节卡ID(全0=未刷到)"],
+  ["findmy_ver","FINDMY版本 (0xD8-0x22)",CMD.PRODUCTION_TEST,[0x22],"FindMy 模块固件版本"],
+  ["findmy_sn","FINDMY读SN (0xBE)",CMD.FINDMY_READ_SN,[],"读回 FindMy 模块 16 字节 SN"],
+  ["key","按键检测 (0xAD)",CMD.KEY_CHECK_TEST,[],"需人工按一次按键"],
+  ["clock","时钟检测 (0xAE)",CMD.CLOCK_CHECK_TEST,[],"固件不返回应答"],
+];
+const TEST_ITEM_TIMEOUTS = { findmy_sn: 2500, findmy_ver: 3000, nfc: 1500 };
+const SCAN_TIMEOUT_MS = 800, SCAN_GAP_MS = 80;
+
+/* ============================================================
+ * 54 字节参数表 (0xC0 下发 / 0xC3 上报, 顺序完全一致)
+ * ============================================================ */
+function wheelEnum(){ return Object.keys(WHEEL_CODE_NAMES).map(k => [Number(k), WHEEL_CODE_NAMES[k]]); }
+function protoEnum(){ return Object.keys(PROTOCOL_NAMES).map(k => [Number(k), PROTOCOL_NAMES[k]]); }
+
+const PARAM_FIELDS = [
+  ["brightness","背光亮度",1,"u8",1,5,"",null,"1~5"],
+  ["powerOffTime","休眠时间",1,"u8",0,10,"",null,"0~10"],
+  ["year","年(20xx)",1,"u8",0,99,"",null,""],
+  ["month","月",1,"u8",1,12,"",null,""],
+  ["day","日",1,"u8",1,31,"",null,""],
+  ["hour","时",1,"u8",0,23,"",null,""],
+  ["minute","分",1,"u8",0,59,"",null,""],
+  ["batteryVoltageLevel","系统电压",1,"u8",0,255,"V",null,""],
+  ["maxAssist","助力档位数",1,"enum",0,0,"",[[3,"3档"],[5,"5档"],[9,"9档"]],""],
+  ["assistDirection","助力正反",1,"bool",0,1,"",null,""],
+  ["startSteel","助力开始磁钢数",1,"u8",2,64,"",null,"2~64"],
+  ["assistPercent","助力比例",1,"u8",0,255,"",null,"6磁钢128 / 12磁钢64"],
+  ["turnbarLevel","转把分档",1,"bool",0,1,"",null,""],
+  ["turnbar6kmph","转把限速6km/h",1,"bool",0,1,"",null,""],
+  ["slowStart","缓启动",1,"u8",0,3,"",null,"0~3"],
+  ["cycleSteel","测速磁钢数",1,"u8",0,15,"",null,"0~15"],
+  ["lowVoltageThreshold","欠压门限",2,"u16",0,65535,"0.1V",null,"高字节在前"],
+  ["currentLimit","限流门限",1,"u8",0,255,"A",null,""],
+  ["speedLimit","助力限速",1,"u8",10,55,"km/h",null,"10~55"],
+  ["wheelSizeCode","轮径代码",1,"enum",0,255,"",wheelEnum(),""],
+  ["batteryCapVaryTime","电量变化时间",1,"u8",1,60,"s",null,"1~60"],
+  ["busAliveTimeout","总线故障超时",1,"u8",5,255,"s",null,"5~255"],
+  ["speedFilterLevel","速度平滑等级",1,"u8",0,10,"",null,"0~10"],
+  ["unit","显示单位",1,"enum",0,1,"",[[0,"公制"],[1,"英制"]],""],
+  ["existBle","有蓝牙",1,"bool",0,1,"",null,""],
+  ["perimeter","周长",2,"u16",0,65535,"mm",null,"高字节在前"],
+  ["runProtocol","运行协议",1,"enum",0,255,"",protoEnum(),""],
+  ["percentageMethod","电量计算方式",1,"u8",0,255,"",null,""],
+  ["pushAssistSwitch","推车助力功能",1,"u8",0,255,"",null,""],
+  ["defaultAssist","默认档位",1,"u8",0,255,"",null,""],
+  ["logoSelect","LOGO项",1,"u8",0,255,"",null,""],
+  ["uartLevel","串口通信电平",1,"u8",0,255,"",null,""],
+  ["beepSwitch","蜂鸣器开关",1,"bool",0,1,"",null,""],
+  ["limitSpeedBeep","高速蜂鸣提醒",1,"u8",0,255,"",null,""],
+  ["cruiseEnable","定速巡航功能",1,"bool",0,1,"",null,""],
+  ["powerOnPassword","开机密码",2,"u16",0,65535,"",null,"高字节在前"],
+  ["menuPassword","菜单密码",2,"u16",0,65535,"",null,"高字节在前"],
+  ["factoryReset","恢复出厂设置",1,"bool",0,1,"",null,"1=仪表恢复出厂参数"],
+  ["eBikeName","车型代号",1,"u8",0,255,"",null,""],
+  ["powerMax","电机功率",2,"u16",0,65535,"W",null,"高字节在前"],
+  ["batteryCapacity","电池容量",2,"u16",0,65535,"",null,"高字节在前"],
+  ["showWheelSize","显示轮径",2,"u16",0,65535,"0.1inch",null,"高字节在前"],
+  ["tiresSize","轮宽",1,"u8",0,255,"",null,""],
+  ["carModel0","服务器车型[0]",1,"u8",0,255,"",null,""],
+  ["carModel1","服务器车型[1]",1,"u8",0,255,"",null,""],
+  ["powerPasswordSwitch","开机密码开关",1,"bool",0,1,"",null,""],
+  ["menuPasswordSwitch","菜单密码开关",1,"bool",0,1,"",null,""],
+];
+const PARAM_SIZE = PARAM_FIELDS.reduce((s, f) => s + f[2], 0);
+
+/* ============================================================
+ * 工具函数
+ * ============================================================ */
+const hexByte = b => b.toString(16).padStart(2,'0').toUpperCase();
+const hexStr = bytes => Array.from(bytes, hexByte).join(' ');
+const asc = bytes => Array.from(bytes, b => (b >= 0x20 && b < 0x7f) ? String.fromCharCode(b) : '?').join('');
+
+function decodeGbk(bytes){
+  try { return new TextDecoder('gbk').decode(new Uint8Array(bytes)).replace(/\u0000+$/, ''); }
+  catch(e){ return hexStr(bytes); }
+}
+function encodeUtf8(s){ return Array.from(new TextEncoder().encode(s)); }
+
+function checksum(arr){ return arr.reduce((s, b) => s + b, 0) & 0xFFFF; }
+
+function buildFrame(cmd, data){
+  if (!data) data = [];
+  if (data.length > LEN_MAX_DATA) throw new Error('数据超过 ' + LEN_MAX_DATA + ' 字节');
+  const body = [FRAME_ADDR, cmd & 0xFF, data.length].concat(data);
+  const cs = checksum(body);
+  return [FRAME_HEAD].concat(body, [cs & 0xFF, (cs >> 8) & 0xFF, 0x0D, 0x0A]);
+}
+
+class FrameParser {
+  constructor(){ this.buf = []; }
+  feed(chunk){
+    for (let i = 0; i < chunk.length; i++) this.buf.push(chunk[i]);
+    const frames = [];
+    while (true){
+      const idx = this.buf.indexOf(FRAME_HEAD);
+      if (idx < 0){ this.buf = []; break; }
+      if (idx > 0) this.buf.splice(0, idx);
+      if (this.buf.length < 4) break;
+      if (this.buf[1] !== FRAME_ADDR){ this.buf.splice(0, 1); continue; }
+      const dataLen = this.buf[3];
+      if (dataLen > LEN_MAX_DATA){ this.buf.splice(0, 1); continue; }
+      const total = dataLen + LEN_MIN;
+      if (this.buf.length < total) break;
+      const raw = this.buf.slice(0, total);
+      const calc = checksum(raw.slice(1, total - 4));
+      const recv = raw[total - 4] | (raw[total - 3] << 8);
+      const tailOk = raw[total - 2] === 0x0D && raw[total - 1] === 0x0A;
+      if (!tailOk || calc !== recv){ this.buf.splice(0, 1); continue; }
+      frames.push([raw[2], raw.slice(4, 4 + dataLen), raw]);
+      this.buf.splice(0, total);
+    }
+    return frames;
+  }
+}
+
+function bitsText(value, table){
+  const on = table.filter(([bit]) => value & (1 << bit)).map(([, n]) => n);
+  return on.length ? on.join('/') : '无';
+}
+function snText(raw){
+  if (raw.every(b => b >= 0x20 && b < 0x7f)){
+    const s = raw.map(b => String.fromCharCode(b)).join('').trim();
+    return s || '(空)';
+  }
+  return hexStr(raw);
+}
+function flagItems(data){
+  const out = [];
+  for (let i = 0; i < 16; i++){
+    out.push([i, FLAG_NAMES[i] || ('保留' + i), data.slice(1 + 4 * i, 5 + 4 * i)]);
+  }
+  return out;
+}
+function flagText(data){
+  return flagItems(data).map(([i, name, raw]) =>
+    `[${i}]${name}=0x${hexByte(raw[0])}${hexByte(raw[1])}${hexByte(raw[2])}${hexByte(raw[3])}`).join(' ');
+}
+
+/* ============================================================
+ * 参数表编解码
+ * ============================================================ */
+function buildParamPayload(values){
+  const out = [];
+  for (const [key, , size] of PARAM_FIELDS){
+    let v = parseInt(values[key] || 0, 10);
+    if (isNaN(v)) v = 0;
+    if (size === 1){ out.push(Math.max(0, Math.min(255, v))); }
+    else { v = Math.max(0, Math.min(0xFFFF, v)); out.push((v >> 8) & 0xFF, v & 0xFF); }
+  }
+  return out;
+}
+function parseParamPayload(data){
+  const r = {}; let pos = 0;
+  for (const [key, , size] of PARAM_FIELDS){
+    if (pos + size > data.length) break;
+    r[key] = size === 1 ? data[pos] : ((data[pos] << 8) | data[pos + 1]);
+    pos += size;
+  }
+  return r;
+}
+function paramDefaults(){
+  const now = new Date();
+  const d = {};
+  for (const [key, , , kind, lo] of PARAM_FIELDS) d[key] = (kind === 'enum' || kind === 'bool') ? 0 : lo;
+  Object.assign(d, {
+    brightness: 5, powerOffTime: 5, year: now.getFullYear() - 2000, month: now.getMonth() + 1, day: now.getDate(),
+    hour: now.getHours(), minute: now.getMinutes(), batteryVoltageLevel: 36, maxAssist: 5, startSteel: 6,
+    assistPercent: 128, cycleSteel: 1, lowVoltageThreshold: 310, currentLimit: 15, speedLimit: 25,
+    wheelSizeCode: 5, batteryCapVaryTime: 5, busAliveTimeout: 10, speedFilterLevel: 3, perimeter: 2074,
+    runProtocol: 0, percentageMethod: 0, defaultAssist: 1, beepSwitch: 1, cruiseEnable: 1,
+    powerMax: 250, batteryCapacity: 10, showWheelSize: 260,
+  });
+  return d;
+}
+
+/* ============================================================
+ * 报文人可读解析
+ * ============================================================ */
+function describe(cmd, data){
+  const n = data.length;
+  if (cmd === CMD.TEST_LCD){
+    if (n >= 1){ const m = LCD_COLORS.find(c => c[0] === data[0]); return 'LCD颜色控制 -> ' + (m ? m[1] : '未知'); }
+    return 'LCD颜色控制应答';
+  }
+  if (cmd === CMD.HMI_CTRL_PARAM_SET){
+    if (n >= 7){
+      const [b0, b1, b2, b3, b4, b5, b6] = data;
+      return `参数设置: 起始磁钢数=${b0 & 0x3F} 方向=${(b0 >> 6) & 1} 助力比例=${b1} 测速磁钢=${b2 & 0x0F} 缓启动=${(b2 >> 4) & 3} 6km/h限速=${(b2 >> 6) & 1} 转把分档=${(b2 >> 7) & 1} 欠压偏压=0x${hexByte(b3)} 电流门限=${b4 & 0x3F} 欠压基准=${(b4 >> 6) & 3} 握手=0x${hexByte(b5)} 轮径=${WHEEL_CODE_NAMES[b6 & 7] || (b6 & 7)} 限速=${(b6 >> 5) & 0x1F}`;
+    }
+    return '参数设置(空)';
+  }
+  if (cmd === CMD.HMI_CTRL_RUN){
+    if (n === 2) return `运行参数: PWM=${data[0]} 状态=0x${hexByte(data[1])}(${bitsText(data[1], RUN_STATUS_BITS)})`;
+    if (n >= 5){
+      const v = data[0], cyc = (data[2] << 8) | data[3];
+      return `控制器上报: 电压=${v & 0x3F}V 巡航=${(v >> 6) & 1} 欠压=${(v >> 7) & 1} 电流=${data[1]} 一圈时间=${cyc}ms 错误码=0x${hexByte(data[4])}`;
+    }
+    return '运行参数';
+  }
+  if (cmd === CMD.WRITE_CONTROL_PARAM) return `写参数(len=${n})${n === PARAM_SIZE ? '' : ` 注意: 应为 ${PARAM_SIZE} 字节`}`;
+  if (cmd === CMD.WRITE_CONTROL_PARAM_RESULT) return '写参数结果: ' + ((n && data[0]) ? '成功' : '失败');
+  if (cmd === CMD.READ_CONTROL_PARAM) return '读参数请求';
+  if (cmd === CMD.READ_CONTROL_PARAM_REPORT){
+    if (n >= PARAM_SIZE){
+      const p = parseParamPayload(data);
+      return `参数上报: 亮度=${p.brightness} 休眠=${p.powerOffTime} 电压=${p.batteryVoltageLevel}V 档位=${p.maxAssist} 限速=${p.speedLimit}km/h 轮径=${WHEEL_CODE_NAMES[p.wheelSizeCode] || p.wheelSizeCode} 周长=${p.perimeter} 协议=${PROTOCOL_NAMES[p.runProtocol] || p.runProtocol} 欠压=${p.lowVoltageThreshold}(0.1V)`;
+    }
+    return `参数上报(len=${n})`;
+  }
+  if (cmd === CMD.FLAG_ARRAY_READ){
+    if (n >= 65) return `标志区: 长度=${data[0]} ${flagText(data)}`;
+    return `标志区应答(len=${n})`;
+  }
+  if (cmd === CMD.FLAG_ARRAY_WRITE){
+    if (n >= 6) return `写标志区: [${data[0]}]${FLAG_NAMES[data[0]] || ('保留' + data[0])}=0x${hexByte(data[1])}${hexByte(data[2])}${hexByte(data[3])}${hexByte(data[4])} 写后关机=${data[5]}`;
+    return '写标志区结果: ' + ((n && data[0]) ? '成功' : '失败');
+  }
+  if (cmd === CMD.VERSION_TYPE_WRITE){
+    if (n >= 2){
+      const vt = VERSION_TYPES.find(v => v[0] === data[0]);
+      return `写版本信息: 类型=${data[0]}(${vt ? vt[1] : '?'}) 结果=${data[1] ? '成功' : '失败'}`;
+    }
+    return '写版本信息应答';
+  }
+  if (cmd === CMD.VERSION_TYPE_READ){
+    if (n >= 2){
+      const t = data[0], vt = VERSION_TYPES.find(v => v[0] === t);
+      if ((t === 5 || t === 6) && n >= 6){
+        const val = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
+        return `版本信息: 类型=${t}(${vt ? vt[1] : '?'}) 值=0x${val.toString(16).padStart(8, '0').toUpperCase()}`;
+      }
+      const payload = data.slice(2, 2 + data[1]);
+      return `版本信息: 类型=${t}(${vt ? vt[1] : '?'}) 长度=${data[1]} 内容=${JSON.stringify(decodeGbk(payload))}`;
+    }
+    return '版本信息应答';
+  }
+  if (cmd === CMD.PROTOCOL_SWITCH) return '协议切换结果: ' + ((n && data[0]) ? '成功' : '失败');
+  if (cmd === CMD.AD_RATIO_REF){
+    if (n === 4){ const val = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3]; return `AD校准: 仪表自采电压=${val}mV`; }
+    if (n === 1) return 'AD校准写入结果: ' + (data[0] ? '成功' : '失败');
+    return `AD校准应答(len=${n})`;
+  }
+  if (cmd === CMD.KEY_CHECK_TEST){
+    if (n >= 1) return `按键检测: 值=0x${hexByte(data[0])}(${bitsText(data[0], KEY_BITS)})`;
+    return '按键检测应答';
+  }
+  if (cmd === CMD.CLOCK_CHECK_TEST) return '时钟检测';
+  if (cmd === CMD.SENSOR_CHECK_TEST){
+    if (n >= 2) return `光敏检测: ADC=${(data[0] << 8) | data[1]}`;
+    return '光敏检测应答';
+  }
+  if (cmd === CMD.BLUE_MACADDR_TEST){
+    if (n >= 12){
+      const chars = asc(data.slice(0, 12));
+      return '蓝牙MAC: ' + chars.match(/.{1,2}/g).join(':').toUpperCase();
+    }
+    return `蓝牙MAC(len=${n}) ${hexStr(data)}`;
+  }
+  if (cmd === CMD.DUT_INFO_GET){
+    if (n >= 2 && data[0] === 0x05) return '大灯开关: ' + (data[1] ? '开' : '关');
+    if (n >= 5){ const val = (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4]; return `仪表自采电压: ${val} mV (${(val / 1000).toFixed(2)} V)`; }
+    return `自采电压应答(len=${n})`;
+  }
+  if (cmd === CMD.CLEAR_MILEAGE){
+    if (n >= 2) return `清除里程: TRIP=${data[0]} 总里程=${data[1]}`;
+    return '清除里程应答';
+  }
+  if (cmd === CMD.FLASH_CAPACITY_READ){
+    if (n >= 1) return `FLASH容量: ${data[0]} MB`;
+    return 'FLASH容量应答';
+  }
+  if (cmd === CMD.RTC_WRITE) return 'RTC写结果: ' + ((n && data[0]) ? '成功' : '失败');
+  if (cmd === CMD.RTC_READ){
+    if (n >= 6) return `RTC: 20${String(data[0]).padStart(2, '0')}-${String(data[1]).padStart(2, '0')}-${String(data[2]).padStart(2, '0')} ${String(data[3]).padStart(2, '0')}:${String(data[4]).padStart(2, '0')}:${String(data[5]).padStart(2, '0')}`;
+    return `RTC应答(len=${n})`;
+  }
+  if (cmd === CMD.CAN_PARAM_SET){
+    if (n >= 2){
+      const rate = (CAN_BAUD_RATES.find(c => c[0] === data[0]) || [data[0], String(data[0])])[1];
+      const ftype = (CAN_FRAME_TYPES.find(c => c[0] === data[1]) || [data[1], String(data[1])])[1];
+      return `CAN小板参数设置: 波特率=${rate} 报文类型=${ftype}`;
+    }
+    if (n === 1) return 'CAN小板参数设置结果: ' + (data[0] ? '成功' : '失败');
+    return 'CAN小板参数设置';
+  }
+  if (cmd === CMD.RST) return '复位';
+  if (cmd === CMD.HEARTBEAT_TEST){
+    if (n >= 1) return '心跳应答: ' + (data[0] ? '成功' : '失败');
+    return '心跳查询';
+  }
+  if (cmd === CMD.USB_INSERT_TEST){
+    if (n >= 3){ const cur = (data[1] << 8) | data[2]; return 'USB检测: ' + (data[0] ? `已插入, 电流=${cur}` : '未插入'); }
+    return 'USB插入检测';
+  }
+  if (cmd === CMD.NFC_ID){
+    if (n >= 4){ const cid = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3]; return 'NFC刷卡: ' + (cid === 0 ? '未刷到卡' : `卡ID=0x${cid.toString(16).padStart(8, '0').toUpperCase()}`); }
+    return 'NFC刷卡验证(启动扫描)';
+  }
+  if (cmd === CMD.NFC_BIND_OR_DELETE){
+    if (n >= 5){ const cid = (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4]; return `NFC应答: 操作=0x${hexByte(data[0])} ${cid === 0 ? '(全0)' : `卡ID=0x${cid.toString(16).padStart(8, '0').toUpperCase()}`}`; }
+    if (n >= 2){ const names = {0xFF:'删除所有卡', 0x01:'绑定指定卡', 0x00:'删除指定卡', 0x02:'上报已绑卡'}; return `NFC操作: ${names[data[0]] || ('未知0x' + hexByte(data[0]))} 卡位=${data[1]}`; }
+    return 'NFC绑定/删除';
+  }
+  if (cmd === CMD.FINDMY_BEEP){
+    if (n >= 1) return 'FindMy蜂鸣: ' + (data[0] ? '开启/成功' : '关闭/失败');
+    return 'FindMy蜂鸣测试';
+  }
+  if (cmd === CMD.FINDMY_WRITE_SN){
+    if (n >= FINDMY_SN_LEN) return 'FindMy写SN: ' + snText(data.slice(0, FINDMY_SN_LEN));
+    if (n >= 1) return 'FindMy写SN结果: ' + (data[0] ? '成功' : '失败');
+    return 'FindMy写SN';
+  }
+  if (cmd === CMD.FINDMY_READ_SN){
+    if (n >= FINDMY_SN_LEN) return 'FindMy SN: ' + snText(data.slice(0, FINDMY_SN_LEN));
+    return 'FindMy读SN请求';
+  }
+  if (cmd === CMD.PRODUCTION_TEST){
+    const sub = FINDMY_TEST_SUBCMDS.find(c => c[0] === data[0]);
+    const subName = sub ? sub[1] : ('未知0x' + hexByte(data[0] || 0));
+    if (n >= 5 && data[0] === 0x22) return `产测应答: FindMy版本=${data[1]}.${data[2]}.${data[3]}.${data[4]}`;
+    if (n >= 2 && (data[0] === 0x23 || data[0] === 0x2C || data[0] === 0x2D)) return `产测应答: ${subName} ${data[1] ? '成功(已回待机)' : '失败(状态未就绪)'}`;
+    if (n >= 1) return '产测命令: ' + subName;
+    return '产测命令';
+  }
+  return '数据: ' + hexStr(data);
+}
+
+function cmdName(cmd){ return CMD_NAMES[cmd] || ('未知命令 0x' + hexByte(cmd)); }
+
+function parseInfo(cmd, data){
+  const n = data.length;
+  if (cmd === CMD.VERSION_TYPE_READ && n >= 2){
+    const vtype = data[0];
+    let text;
+    if ((vtype === 5 || vtype === 6) && n >= 6){
+      const val = (data[2] << 24) | (data[3] << 16) | (data[4] << 8) | data[5];
+      text = '0x' + val.toString(16).padStart(8, '0').toUpperCase();
+    } else {
+      const raw = data.slice(2, 2 + data[1]);
+      text = decodeGbk(raw).trim();
+      if (!text) text = '(空)';
+    }
+    return ['ver' + vtype, text];
+  }
+  if (cmd === CMD.DUT_INFO_GET && n >= 5){
+    const val = (data[1] << 24) | (data[2] << 16) | (data[3] << 8) | data[4];
+    return ['volt', `${val} mV (${(val / 1000).toFixed(2)} V)`];
+  }
+  if (cmd === CMD.FLASH_CAPACITY_READ && n >= 1) return ['flash', `${data[0]} MB`];
+  if (cmd === CMD.BLUE_MACADDR_TEST && n >= 12){
+    const chars = asc(data.slice(0, 12));
+    return ['mac', chars.match(/.{1,2}/g).join(':').toUpperCase()];
+  }
+  if (cmd === CMD.SENSOR_CHECK_TEST && n >= 2) return ['light', `ADC ${(data[0] << 8) | data[1]}`];
+  if (cmd === CMD.RTC_READ && n >= 6) return ['rtc', `20${String(data[0]).padStart(2, '0')}-${String(data[1]).padStart(2, '0')}-${String(data[2]).padStart(2, '0')} ${String(data[3]).padStart(2, '0')}:${String(data[4]).padStart(2, '0')}:${String(data[5]).padStart(2, '0')}`];
+  if (cmd === CMD.AD_RATIO_REF && n === 4){ const val = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3]; return ['ad', `仪表自采电压 ${val} mV`]; }
+  if (cmd === CMD.FLAG_ARRAY_READ && n >= 65){
+    const setParts = flagItems(data).filter(([, , raw]) => raw.some(b => b)).map(([i, name, raw]) => `[${i}]${name}=0x${hexByte(raw[0])}${hexByte(raw[1])}${hexByte(raw[2])}${hexByte(raw[3])}`);
+    return ['flag', `长度${data[0]} | ${setParts.length ? setParts.join(' ') : '全部标志为 0'}`];
+  }
+  if (cmd === CMD.READ_CONTROL_PARAM_REPORT && n >= PARAM_SIZE){
+    const p = parseParamPayload(data);
+    return ['param', `亮度 ${p.brightness} / 限速 ${p.speedLimit} km/h / 周长 ${p.perimeter} mm / 轮径 ${WHEEL_CODE_NAMES[p.wheelSizeCode] || p.wheelSizeCode} / 协议 ${PROTOCOL_NAMES[p.runProtocol] || p.runProtocol}`];
+  }
+  if (cmd === CMD.KEY_CHECK_TEST && n >= 1) return ['key', `0x${hexByte(data[0])} (${bitsText(data[0], KEY_BITS)})`];
+  if (cmd === CMD.HEARTBEAT_TEST && n >= 1) return ['hb', data[0] ? '在线(应答正常)' : '异常(应答失败)'];
+  if (cmd === CMD.USB_INSERT_TEST && n >= 3){ const cur = (data[1] << 8) | data[2]; return ['usb', data[0] ? `已插入, 电流 ${cur} mA` : '未插入']; }
+  if (cmd === CMD.NFC_ID && n >= 4){ const cid = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3]; return ['nfc', cid ? `卡ID 0x${cid.toString(16).padStart(8, '0').toUpperCase()}` : '(未刷到卡)']; }
+  if (cmd === CMD.FINDMY_READ_SN && n >= FINDMY_SN_LEN) return ['findmy_sn', snText(data.slice(0, FINDMY_SN_LEN))];
+  if (cmd === CMD.PRODUCTION_TEST && n >= 5 && data[0] === 0x22) return ['findmy_ver', `${data[1]}.${data[2]}.${data[3]}.${data[4]}`];
+  if (cmd === CMD.CLOCK_CHECK_TEST) return ['clock', '已响应'];
+  return null;
+}
+
+/* ============================================================
+ * 串口链路 (Web Serial)
+ * ============================================================ */
+let port = null, reader = null, writer = null, closing = false;
+let txCount = 0, rxCount = 0;
+let autoReply = true, canEnabled = false, canBaud = 1, canExtended = 0, canConfigured = false;
+let canAckResolve = null;
+
+function usbInfo(p){
+  const info = p.getInfo ? p.getInfo() : {};
+  return { vid: info.usbVendorId, pid: info.usbProductId };
+}
+function portKey(p){
+  const { vid, pid } = usbInfo(p);
+  if (vid == null || pid == null) return '未知设备';
+  const hex = v => '0x' + v.toString(16).toUpperCase().padStart(4, '0');
+  return `VID:${hex(vid)} PID:${hex(pid)}`;
+}
+function portLabel(p){
+  const { vid, pid } = usbInfo(p);
+  if (vid == null || pid == null) return 'USB串口 (未知设备)';
+  const hex = v => '0x' + v.toString(16).toUpperCase().padStart(4, '0');
+  const CHIPS = {
+    '0x1A86': { '0x7523':'CH340', '0x5523':'CH341', '0x55D4':'CH340G' },
+    '0x10C4': { '0xEA60':'CP2102', '0xEA70':'CP2105', '0xEA71':'CP2108' },
+    '0x0403': { '0x6001':'FT232R', '0x6010':'FT2232H', '0x6014':'FT232H', '0x6015':'FT231X' },
+    '0x067B': { '0x2303':'PL2303', '0x23A3':'PL2303TA' },
+  };
+  const vk = hex(vid), pk = hex(pid);
+  const name = (CHIPS[vk] && CHIPS[vk][pk]) || 'USB串口';
+  return `${name} (VID:${vk} PID:${pk})`;
+}
+
+async function refreshPorts(){
+  const sel = document.getElementById('port-sel');
+  const prev = sel.value;
+  sel.innerHTML = '';
+  try {
+    const ports = await navigator.serial.getPorts();
+    ports.forEach(p => {
+      const o = document.createElement('option');
+      o.value = portKey(p); o.textContent = portLabel(p); o._port = p;
+      sel.appendChild(o);
+    });
+    if (!ports.length){
+      const o = document.createElement('option');
+      o.value = ''; o.textContent = '(无已授权串口, 请点「连接串口」选择)';
+      sel.appendChild(o);
+    }
+    if (prev && Array.from(sel.options).some(o => o.value === prev)) sel.value = prev;
+    else if (port){
+      const cur = portKey(port);
+      if (Array.from(sel.options).some(o => o.value === cur)) sel.value = cur;
+    }
+  } catch(e){ /* 忽略 */ }
+}
+
+async function pickAndConnect(){
+  let p;
+  try { p = await navigator.serial.requestPort(); }
+  catch(e){ if (e.name !== 'NotFoundError') log('ERR', '选择串口失败: ' + e); return; }
+  if (p) await connect(p);
+}
+
+async function connect(specificPort){
+  if (port){ await disconnect(); }
+  let p = specificPort || null;
+  if (!p){
+    const sel = document.getElementById('port-sel');
+    const chosen = Array.from(sel.options).find(o => o.value && o._port && o.value === sel.value);
+    if (chosen) p = chosen._port;
+  }
+  if (!p){
+    try { p = await navigator.serial.requestPort(); }
+    catch(e){ if (e.name !== 'NotFoundError') log('ERR', '选择串口失败: ' + e); return; }
+  }
+  try {
+    await p.open({ baudRate: parseInt(document.getElementById('baud').value, 10) });
+  } catch(e){ log('ERR', '打开串口失败: ' + e); return; }
+  port = p; closing = false;
+  canConfigured = false;
+  canEnabled = document.getElementById('can-enable').checked;
+  canBaud = parseInt(document.getElementById('can-baud').value, 10);
+  canExtended = parseInt(document.getElementById('can-frame').value, 10);
+  document.getElementById('conn-status').textContent = '已连接 ' + portLabel(p);
+  document.getElementById('conn-status').className = 'status ok';
+  document.getElementById('btn-connect').disabled = true;
+  document.getElementById('btn-disconnect').disabled = false;
+  log('INFO', '串口已打开 ' + portLabel(p) + ' @ ' + document.getElementById('baud').value + ' 8N1');
+  reader = port.readable.getReader();
+  readLoop();
+  if (canEnabled) await configureCan();
+  await refreshPorts();
+  startScan('ver');
+}
+
+async function disconnect(){
+  closing = true;
+  if (reader){ try { await reader.cancel(); } catch(e){} reader = null; }
+  if (writer){ try { writer.releaseLock(); } catch(e){} writer = null; }
+  if (port){ try { await port.close(); } catch(e){} port = null; }
+  document.getElementById('conn-status').textContent = '未连接';
+  document.getElementById('conn-status').className = 'status off';
+  document.getElementById('btn-connect').disabled = false;
+  document.getElementById('btn-disconnect').disabled = true;
+  cancelScan();
+  log('INFO', '串口已关闭');
+}
+
+async function readLoop(){
+  while (port && reader && !closing){
+    try {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value && value.length){
+        for (const [cmd, data, raw] of parser.feed(value)){
+          rxCount++;
+          log('RX', `${cmdName(cmd).padEnd(18)} ${describe(cmd, data)} | ${hexStr(raw)}`);
+          if (cmd === CMD.CAN_PARAM_SET && canAckResolve){ const r = canAckResolve; canAckResolve = null; r(); }
+          if (cmd === CMD.HMI_CTRL_PARAM_SET && autoReply){
+            sendFrame(CMD.HMI_CTRL_PARAM_SET, [], '自动应答');
+          }
+          handleFrame(cmd, data);
+        }
+      }
+    } catch(e){
+      if (!closing) log('ERR', '接收异常: ' + e);
+      break;
+    }
+  }
+}
+
+async function configureCan(){
+  canConfigured = false;
+  const payload = [canBaud, canExtended];
+  if (!doSendFrame(CMD.CAN_PARAM_SET, payload, 'CAN小板配置')) return false;
+  const ok = await new Promise(resolve => {
+    canAckResolve = () => {
+      canConfigured = true;
+      const rate = (CAN_BAUD_RATES.find(c => c[0] === canBaud) || ['', String(canBaud)])[1];
+      const ftype = (CAN_FRAME_TYPES.find(c => c[0] === canExtended) || ['', String(canExtended)])[1];
+      log('INFO', 'CAN小板配置成功: 波特率=' + rate + ' 报文类型=' + ftype);
+      resolve(true);
+    };
+    setTimeout(() => {
+      if (canAckResolve){ canAckResolve = null; canConfigured = true; log('WARN', 'CAN小板未应答 0xFF, 按已配置继续'); resolve(false); }
+    }, CAN_ACK_TIMEOUT_MS);
+  });
+  if (ok) await new Promise(r => setTimeout(r, CAN_CONFIG_GAP_MS));
+  return ok;
+}
+
+async function sendFrame(cmd, data, note){
+  if (!data) data = [];
+  if (!port){ log('ERR', '串口未打开, 无法发送 ' + cmdName(cmd)); return false; }
+  if (canEnabled && !canConfigured && cmd !== CMD.CAN_PARAM_SET){
+    await configureCan();
+  }
+  return doSendFrame(cmd, data, note);
+}
+
+function doSendFrame(cmd, data, note){
+  if (!port){ log('ERR', '串口未打开, 无法发送 ' + cmdName(cmd)); return false; }
+  let frame;
+  try { frame = buildFrame(cmd, data); } catch(e){ log('ERR', '组帧失败: ' + e); return false; }
+  try {
+    if (!writer) writer = port.writable.getWriter();
+    writer.write(new Uint8Array(frame));
+  } catch(e){ log('ERR', '发送失败: ' + e); return false; }
+  txCount++;
+  let desc = describe(cmd, data);
+  if (note) desc = `${note} [${desc}]`;
+  log('TX', `${cmdName(cmd).padEnd(18)} ${desc} | ${hexStr(frame)}`);
+  updateCount();
+  return true;
+}
+
+/* ============================================================
+ * 巡检状态机
+ * ============================================================ */
+const parser = new FrameParser();
+let scanJobs = [], scanCur = null, scanToken = 0, scanTotal = 0, scanDone = 0;
+let scanTimer = null;
+
+function startScan(only){
+  if (!port){ alert('请先打开串口'); return; }
+  const jobs = [];
+  if (only === null || only === undefined || only === 'ver'){
+    for (const [vtype] of VERSION_TYPES) jobs.push(['ver' + vtype, CMD.VERSION_TYPE_READ, [vtype]]);
+  }
+  if (only === null || only === undefined || only === 'test'){
+    for (const [key, , cmd, data] of TEST_ITEMS) jobs.push([key, cmd, data]);
+  }
+  if (!jobs.length) return;
+  scanToken++; scanCur = null; scanJobs = jobs.slice(); scanTotal = jobs.length; scanDone = 0;
+  for (const [key] of jobs) setRow(key, null, '排队中');
+  document.getElementById('scan-var').textContent = '正在读取 0/' + scanTotal;
+  log('INFO', '开始自动读取设备信息, 共 ' + scanTotal + ' 项');
+  scanNext();
+}
+
+function scanNext(){
+  if (scanCur !== null) return;
+  if (!scanJobs.length){
+    if (scanTotal){
+      document.getElementById('scan-var').textContent = `读取完成 ${scanDone}/${scanTotal}`;
+      updateSummary();
+    }
+    return;
+  }
+  if (!port){ scanJobs = []; document.getElementById('scan-var').textContent = '串口已关闭, 读取中止'; return; }
+  const [key, cmd, data] = scanJobs.shift();
+  scanCur = key;
+  setRow(key, null, '查询中...');
+  sendFrame(cmd, data, '自动读取');
+  const token = scanToken;
+  const timeout = TEST_ITEM_TIMEOUTS[key] || SCAN_TIMEOUT_MS;
+  scanTimer = setTimeout(() => scanTimeout(token, key), timeout);
+}
+
+function scanAdvance(){
+  scanCur = null;
+  scanDone++;
+  document.getElementById('scan-var').textContent = `正在读取 ${scanDone}/${scanTotal}`;
+  setTimeout(scanNext, SCAN_GAP_MS);
+}
+
+function scanTimeout(token, key){
+  if (token !== scanToken || scanCur !== key) return;
+  if (key === 'key') setRow(key, null, '未触发(需按键)');
+  else if (key === 'clock') setRow(key, null, '固件无应答');
+  else setRow(key, null, '无应答');
+  scanAdvance();
+}
+
+function cancelScan(){
+  scanToken++;
+  scanCur = null; scanJobs = [];
+  if (scanTimer){ clearTimeout(scanTimer); scanTimer = null; }
+  scanTotal = 0;
+  document.getElementById('scan-var').textContent = '读取已中止';
+}
+
+function handleFrame(cmd, data){
+  const hit = parseInfo(cmd, data);
+  if (hit){
+    setRow(hit[0], hit[1], '完成');
+    if (hit[0].indexOf('ver') === 0) updateSummary();
+    if (scanCur === hit[0]) scanAdvance();
+  }
+  if (cmd === CMD.READ_CONTROL_PARAM_REPORT && data.length >= PARAM_SIZE) applyParamToForm(parseParamPayload(data));
+  if (cmd === CMD.HMI_CTRL_PARAM_SET && data.length >= 7){
+    const [b0, b1, b2, b3, b4, b5, b6] = data;
+    document.getElementById('mon-cfg').textContent =
+      `起始磁钢数: ${b0 & 0x3F}\n方向: ${(b0 >> 6) & 1}\n助力比例: ${b1}\n测速磁钢数: ${b2 & 0x0F}\n缓启动: ${(b2 >> 4) & 3}\n转把限速6km/h: ${(b2 >> 6) & 1}\n转把分档: ${(b2 >> 7) & 1}\n欠压偏压: ${b3} (0x${hexByte(b3)})\n电流门限: ${b4 & 0x3F}\n欠压基准: ${(b4 >> 6) & 3}\n握手字节: 0x${hexByte(b5)}\n轮径: ${WHEEL_CODE_NAMES[b6 & 7] || (b6 & 7)}\n限速: ${(b6 >> 5) & 0x1F} km/h`;
+  } else if (cmd === CMD.HMI_CTRL_RUN){
+    if (data.length === 2) document.getElementById('mon-run').textContent = `PWM: ${data[0]}\n状态字: 0x${hexByte(data[1])}\n生效项: ${bitsText(data[1], RUN_STATUS_BITS)}`;
+    else if (data.length >= 5){
+      const v = data[0];
+      document.getElementById('mon-run').textContent = `电池电压: ${v & 0x3F} V\n巡航: ${(v >> 6) & 1}\n欠压: ${(v >> 7) & 1}\n电流: ${data[1]} A\n一圈时间: ${(data[2] << 8) | data[3]} ms\n错误码: 0x${hexByte(data[4])}`;
+    }
+  }
+}
+
+/* ============================================================
+ * 日志
+ * ============================================================ */
+function ts(){
+  const d = new Date();
+  const p = x => String(x).padStart(2, '0');
+  return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3, '0')}`;
+}
+function log(tag, text){
+  if ((tag === 'TX' || tag === 'RX') && !document.getElementById('hex-log').checked) text = text.split(' | ')[0];
+  const el = document.getElementById('log');
+  const span = document.createElement('div');
+  span.className = 't-' + tag;
+  span.textContent = `[${ts()}] ${tag.padEnd(4)} ${text}`;
+  el.appendChild(span);
+  while (el.childNodes.length > 5000) el.removeChild(el.firstChild);
+  if (document.getElementById('auto-scroll').checked) el.scrollTop = el.scrollHeight;
+  updateCount();
+}
+function updateCount(){
+  document.getElementById('count').textContent = `TX ${txCount} / RX ${rxCount}`;
+  document.getElementById('mon-stat').textContent = `TX ${txCount} 帧 / RX ${rxCount} 帧`;
+}
+
+/* ============================================================
+ * UI 构建
+ * ============================================================ */
+function setRow(key, value, status){
+  const tr = document.getElementById('row-' + key);
+  if (!tr) return;
+  const valEl = tr.querySelector('.val');
+  const stEl = tr.querySelector('.status');
+  if (value !== null && value !== undefined) valEl.textContent = value;
+  if (status !== null && status !== undefined){
+    stEl.textContent = status;
+    stEl.className = 'status';
+    if (status.indexOf('完成') === 0) stEl.className = 'status status-done';
+    else if (status.indexOf('无应答') >= 0 || status.indexOf('失败') >= 0 || status.indexOf('固件无应答') >= 0) stEl.className = 'status status-err';
+    else if (status.indexOf('查询') >= 0 || status.indexOf('排队') >= 0) stEl.className = 'status status-wait';
+  }
+}
+function updateSummary(){
+  const sn = rowVal('ver0'), hw = rowVal('ver2'), app = rowVal('ver4');
+  const parts = [];
+  if (sn) parts.push('SN ' + sn);
+  if (hw) parts.push('硬件 ' + hw);
+  if (app) parts.push('APP ' + app);
+  document.getElementById('summary').textContent = parts.length ? parts.join(' | ') : '设备信息: 打开串口后自动读取版本信息';
+}
+function rowVal(key){
+  const tr = document.getElementById('row-' + key);
+  return tr ? tr.querySelector('.val').textContent : '';
+}
+
+function buildInfoTables(){
+  const vt = document.getElementById('ver-table');
+  let html = '<tr><th style="width:200px">项目</th><th>读数 / 内容</th><th style="width:120px">状态</th></tr>';
+  for (const [vtype, vname] of VERSION_TYPES) html += `<tr id="row-ver${vtype}"><td>${vname} (${vtype})</td><td class="val"></td><td class="status">未读取</td></tr>`;
+  vt.innerHTML = html;
+  const tt = document.getElementById('test-table');
+  let html2 = '<tr><th style="width:200px">项目</th><th>读数 / 内容</th><th style="width:120px">状态</th></tr>';
+  for (const [key, name, , , tip] of TEST_ITEMS) html2 += `<tr id="row-${key}"><td>${name}</td><td class="val">${tip}</td><td class="status">未读取</td></tr>`;
+  tt.innerHTML = html2;
+}
+
+function buildLcd(){
+  const box = document.getElementById('lcd-colors');
+  LCD_COLORS.forEach(([code, name]) => {
+    const b = document.createElement('button');
+    b.textContent = name; b.className = 'color-btn';
+    b.onclick = () => sendFrame(CMD.TEST_LCD, [code], 'LCD颜色');
+    box.appendChild(b);
+  });
+}
+let lcdCycleTimer = null, lcdCycleIdx = 0, lcdCycleOn = false;
+function toggleLcdCycle(){
+  const btn = document.getElementById('btn-lcd-cycle');
+  if (lcdCycleOn){ lcdCycleOn = false; clearInterval(lcdCycleTimer); btn.textContent = '开始循环'; log('INFO', '自动颜色循环已停止'); return; }
+  lcdCycleOn = true; lcdCycleIdx = 0; btn.textContent = '停止循环';
+  log('INFO', '自动颜色循环已启动 (红/绿/蓝/白/黑, 1s/色)');
+  lcdCycleTimer = setInterval(() => {
+    if (!lcdCycleOn) return;
+    const code = LCD_AUTO_SEQUENCE[lcdCycleIdx % LCD_AUTO_SEQUENCE.length];
+    sendFrame(CMD.TEST_LCD, [code], 'LCD颜色');
+    lcdCycleIdx++;
+  }, 1000);
+}
+
+function buildParamForm(){
+  const box = document.getElementById('param-form');
+  const defaults = paramDefaults();
+  box.innerHTML = '';
+  for (const [key, name, size, kind, lo, hi, unit, enm, tip] of PARAM_FIELDS){
+    const wrap = document.createElement('div'); wrap.className = 'field';
+    const lbl = document.createElement('label'); lbl.className = 'lbl';
+    lbl.textContent = unit ? `${name}(${unit})` : name;
+    let ctrl;
+    if (kind === 'enum' || kind === 'bool'){
+      ctrl = document.createElement('select');
+      const choices = enm || [[0, '0'], [1, '1']];
+      choices.forEach(([v, label]) => { const o = document.createElement('option'); o.value = String(v); o.textContent = String(label); ctrl.appendChild(o); });
+    } else {
+      ctrl = document.createElement('input'); ctrl.type = 'number';
+      const hiBound = size === 2 ? 65535 : 255;
+      ctrl.min = lo; ctrl.max = hi || hiBound; ctrl.step = 1;
+    }
+    ctrl.id = 'p-' + key;
+    const tipEl = document.createElement('span'); tipEl.className = 'tip'; tipEl.textContent = tip || '';
+    wrap.appendChild(lbl); wrap.appendChild(ctrl); wrap.appendChild(tipEl);
+    box.appendChild(wrap);
+  }
+  applyParamToForm(defaults);
+}
+function paramControl(key){ return document.getElementById('p-' + key); }
+function collectParam(){
+  const values = {};
+  for (const [key, name, size] of PARAM_FIELDS){
+    const c = paramControl(key);
+    const v = parseInt(c.value, 10);
+    if (isNaN(v)){ alert('参数 [' + name + '] 取值非法: ' + c.value); throw new Error('bad'); }
+    if (size === 1 && (v < 0 || v > 255)){ alert('参数 [' + name + '] 超出 0~255'); throw new Error('bad'); }
+    if (size === 2 && (v < 0 || v > 0xFFFF)){ alert('参数 [' + name + '] 超出 0~65535'); throw new Error('bad'); }
+    values[key] = v;
+  }
+  return values;
+}
+function applyParamToForm(values){
+  for (const [key, , , kind, , , , enm] of PARAM_FIELDS){
+    const c = paramControl(key); if (!c) continue;
+    const v = values[key] !== undefined ? values[key] : 0;
+    if (kind === 'enum' && enm){
+      const found = enm.find(([val]) => val === v);
+      c.value = String(found ? found[0] : (enm[0] ? enm[0][0] : 0));
+    } else c.value = String(v);
+  }
+}
+function writeParam(){
+  let values;
+  try { values = collectParam(); } catch(e){ return; }
+  if (!confirm(`即将把 ${PARAM_SIZE} 字节参数写入仪表出厂区, 继续?`)) return;
+  sendFrame(CMD.WRITE_CONTROL_PARAM, buildParamPayload(values), '写参数');
+}
+
+/* --- 生产测试页 --- */
+function groupCard(title){
+  const box = document.getElementById('test-groups');
+  const card = document.createElement('div'); card.className = 'card';
+  const h = document.createElement('h3'); h.textContent = title; card.appendChild(h);
+  box.appendChild(card);
+  return card;
+}
+function addBtn(card, text, fn, extra){
+  const b = document.createElement('button'); b.textContent = text; b.style.margin = '2px';
+  if (extra) b.className = extra;
+  b.onclick = fn;
+  card.appendChild(b);
+}
+function addLabel(card, text, tip){
+  const p = document.createElement('div');
+  p.style.cssText = 'margin:4px 0';
+  if (tip){ p.className = 'tip'; p.textContent = text; }
+  else { p.textContent = text; }
+  card.appendChild(p);
+}
+
+function buildTestPage(){
+  let c = groupCard('基础检测');
+  addBtn(c, '心跳查询 (0x01)', () => sendFrame(CMD.HEARTBEAT_TEST));
+  addBtn(c, '按键检测 (0xAD)', () => sendFrame(CMD.KEY_CHECK_TEST));
+  addBtn(c, '时钟检测 (0xAE)', () => sendFrame(CMD.CLOCK_CHECK_TEST));
+  addBtn(c, '光敏检测 (0xAF)', () => sendFrame(CMD.SENSOR_CHECK_TEST));
+  addBtn(c, 'USB插入检测 (0xB7)', () => sendFrame(CMD.USB_INSERT_TEST));
+  addBtn(c, '蓝牙MAC (0xB0)', () => sendFrame(CMD.BLUE_MACADDR_TEST));
+  addBtn(c, '自采电压 (0xD6)', () => sendFrame(CMD.DUT_INFO_GET));
+  addBtn(c, 'FLASH容量 (0xBF)', () => sendFrame(CMD.FLASH_CAPACITY_READ));
+
+  c = groupCard('校准 / 时间');
+  addBtn(c, '读AD校准值 (0xAC 0)', () => sendFrame(CMD.AD_RATIO_REF, [0x00]));
+  addBtn(c, '写AD校准值 (0xAC 1)', () => sendFrame(CMD.AD_RATIO_REF, [0x01]));
+  addBtn(c, '读RTC (0xC5)', () => sendFrame(CMD.RTC_READ));
+  addBtn(c, '写RTC=当前PC时间 (0xC4)', writeRtc);
+  addBtn(c, '复位 (0x80)', () => sendFrame(CMD.RST));
+  addBtn(c, '模拟控制器应答 (0x53)', () => sendFrame(CMD.HMI_CTRL_PARAM_SET, []));
+
+  c = groupCard('里程 / 协议');
+  const cr = document.createElement('div'); cr.style.margin = '4px 0';
+  cr.innerHTML = '<label class="chk"><input type="checkbox" id="clear-trip" checked> 清TRIP</label>' +
+                 '<label class="chk"><input type="checkbox" id="clear-total"> 清总里程</label>';
+  c.appendChild(cr);
+  addBtn(c, '清除里程 (0xB5)', clearMileage);
+  const pr = document.createElement('div'); pr.style.margin = '4px 0';
+  pr.innerHTML = '<label>协议:</label> <select id="proto-sel">' +
+    [0, 1, 2, 3].map(i => `<option value="${i}">${PROTOCOL_NAMES[i]}</option>`).join('') + '</select>';
+  c.appendChild(pr);
+  addBtn(c, '协议切换 (0xAB)', () => { const p = parseInt(document.getElementById('proto-sel').value, 10); sendFrame(CMD.PROTOCOL_SWITCH, [1, p], '协议切换->' + PROTOCOL_NAMES[p]); });
+
+  c = groupCard('标志区 (0xA6 / 0xA7)');
+  addBtn(c, '读标志区 64B (0xA6)', () => sendFrame(CMD.FLAG_ARRAY_READ));
+  const fr = document.createElement('div'); fr.style.margin = '4px 0';
+  fr.innerHTML = '<label>索引:</label> <input type="number" id="flag-idx" value="0" min="0" max="15" style="width:60px">' +
+                 ' <span id="flag-name" style="color:var(--green)">老化进入</span>' +
+                 ' <span class="tip">0~15, 标志4字节高字节在前</span>';
+  c.appendChild(fr);
+  const fr2 = document.createElement('div'); fr2.style.margin = '4px 0';
+  for (let i = 0; i < 4; i++) fr2.innerHTML += `<input type="text" id="flag-b${i}" value="0" style="width:48px;margin-right:4px" class="mono">`;
+  c.appendChild(fr2);
+  const fr3 = document.createElement('div'); fr3.style.margin = '4px 0';
+  fr3.innerHTML = '<label class="chk"><input type="checkbox" id="flag-off"> 写后关机</label>';
+  c.appendChild(fr3);
+  addBtn(c, '写标志区 (0xA7)', writeFlag);
+
+  c = groupCard('版本信息 (0xA8 / 0xA9)');
+  const vr = document.createElement('div'); vr.style.margin = '4px 0';
+  vr.innerHTML = '<label>类型:</label> <select id="ver-type">' + VERSION_TYPES.map(([t, n]) => `<option value="${t}">${n}</option>`).join('') + '</select>';
+  c.appendChild(vr);
+  addBtn(c, '读取版本信息 (0xA9)', () => { sendFrame(CMD.VERSION_TYPE_READ, [parseInt(document.getElementById('ver-type').value, 10)], '读版本信息'); });
+  const vr2 = document.createElement('div'); vr2.style.margin = '4px 0';
+  vr2.innerHTML = '<label>内容:</label> <input type="text" id="ver-text" style="width:220px">';
+  c.appendChild(vr2);
+  addBtn(c, '写入版本信息 (0xA8)', writeVersion);
+  addLabel(c, '类型5/6 为4字节数值, 类型7 为32字节; 其它为字符串', true);
+
+  c = groupCard('上位机模拟控制器');
+  addLabel(c, '仪表每 500ms 上报 0x53 配置参数; 收到上位机 0x53 后改为上报 0x52 运行参数。', true);
+  addBtn(c, '应答一次 (0x53)', () => sendFrame(CMD.HMI_CTRL_PARAM_SET, [], '模拟控制器应答'));
+  addBtn(c, '下发控制器上报数据 (0x52)', () => { sendFrame(CMD.HMI_CTRL_RUN, [36, 5, 3, 32, 0], '模拟控制器上报'); });
+  addLabel(c, '0x52 载荷: 电压/巡航/欠压 | 电流 | 一圈时间H/L | 错误码', true);
+
+  c = groupCard('FINDMY (0xBC ~ 0xBE / 0xD8)');
+  const snr = document.createElement('div'); snr.style.margin = '4px 0';
+  snr.innerHTML = '<label>SN:</label> <input type="text" id="findmy-sn" style="width:180px" class="mono">';
+  c.appendChild(snr);
+  addBtn(c, '写SN (0xBD, 16字符)', writeFindmySn);
+  addBtn(c, '读SN (0xBE)', () => sendFrame(CMD.FINDMY_READ_SN));
+  addBtn(c, '蜂鸣一声 (0xBC 01)', () => sendFrame(CMD.FINDMY_BEEP, [0x01]));
+  addBtn(c, '关闭蜂鸣 (0xBC 00)', () => sendFrame(CMD.FINDMY_BEEP, [0x00]));
+  addBtn(c, '读FindMy版本 (0xD8 22)', () => sendFrame(CMD.PRODUCTION_TEST, [0x22]));
+  addBtn(c, 'FindMy复位 (0xD8 23)', () => sendFrame(CMD.PRODUCTION_TEST, [0x23]));
+  addBtn(c, 'FindMy开机 (0xD8 2C)', () => sendFrame(CMD.PRODUCTION_TEST, [0x2C]));
+  addBtn(c, 'FindMy关机 (0xD8 2D)', () => sendFrame(CMD.PRODUCTION_TEST, [0x2D]));
+  addBtn(c, '恢复出厂 (0xD8 31)', findmyFactoryReset, 'danger');
+  addLabel(c, 'FindMy 相关应答由固件延时 1~2s 上报; 0xD8-0x31 会清除仪表 NVM 参数', true);
+
+  c = groupCard('NFC (0xB9 / 0xBA)');
+  addBtn(c, '刷卡验证 (0xB9)', () => sendFrame(CMD.NFC_ID));
+  const slotr = document.createElement('div'); slotr.style.margin = '4px 0';
+  slotr.innerHTML = '<label>卡位:</label> <input type="number" id="nfc-slot" value="0" min="0" max="3" style="width:60px"> <span class="tip">0~3</span>';
+  c.appendChild(slotr);
+  addBtn(c, '绑定该卡位 (0xBA 01)', nfcBind);
+  addBtn(c, '删除该卡位 (0xBA 00)', nfcDelete);
+  addBtn(c, '上报已绑卡 (0xBA 02)', () => sendFrame(CMD.NFC_BIND_OR_DELETE, [0x02, 0x00]));
+  addBtn(c, '删除所有NFC卡 (0xBA FF)', nfcDeleteAll, 'danger');
+  addLabel(c, '0xB9/绑定会触发固件周期上报卡ID, 刷卡后以最新一次为准; 绑定/删除为不可逆操作', true);
+
+  c = groupCard('大灯开关 (0xD6 05)');
+  addBtn(c, '大灯开 (0xD6 05 01)', () => sendFrame(CMD.DUT_INFO_GET, [0x05, 0x01], '大灯开'));
+  addBtn(c, '大灯关 (0xD6 05 00)', () => sendFrame(CMD.DUT_INFO_GET, [0x05, 0x00], '大灯关'));
+  addLabel(c, '新固件 0xD6 的子功能: [0x05, 0/1] 切换大灯并应答; 旧固件 0xD6 空数据为读自采电压, 两者互不影响', true);
+
+  document.getElementById('flag-idx').addEventListener('input', refreshFlagName);
+}
+
+function refreshFlagName(){
+  const v = parseInt(document.getElementById('flag-idx').value, 10);
+  document.getElementById('flag-name').textContent = (v >= 0 && v <= 15) ? (FLAG_NAMES[v] || ('保留' + v)) : '';
+}
+function writeFlag(){
+  const idx = parseInt(document.getElementById('flag-idx').value, 10);
+  if (!(idx >= 0 && idx <= 15)){ alert('索引范围 0~15'); return; }
+  const vals = [];
+  for (let i = 0; i < 4; i++){
+    const v = parseInt(document.getElementById('flag-b' + i).value, 10);
+    if (isNaN(v) || v < 0 || v > 255){ alert('标志字节非法'); return; }
+    vals.push(v & 0xFF);
+  }
+  const off = document.getElementById('flag-off').checked ? 1 : 0;
+  sendFrame(CMD.FLAG_ARRAY_WRITE, [idx].concat(vals, [off]), `写标志区[${idx}]`);
+}
+function writeVersion(){
+  const t = parseInt(document.getElementById('ver-type').value, 10);
+  const text = document.getElementById('ver-text').value;
+  let payload;
+  if (t === 5 || t === 6){
+    const val = parseInt(text, 0);
+    if (isNaN(val)){ alert('类型 5/6 需要 4 字节数值(如 0x12345678)'); return; }
+    payload = [(val >> 24) & 0xFF, (val >> 16) & 0xFF, (val >> 8) & 0xFF, val & 0xFF];
+  } else if (t === 7){
+    const arr = encodeUtf8(text).slice(0, 32); while (arr.length < 32) arr.push(0);
+    payload = arr;
+  } else {
+    payload = encodeUtf8(text).slice(0, 64);
+  }
+  if (!payload.length){ alert('内容不能为空'); return; }
+  sendFrame(CMD.VERSION_TYPE_WRITE, [t, payload.length].concat(payload), '写版本信息');
+}
+function writeRtc(){
+  const now = new Date();
+  sendFrame(CMD.RTC_WRITE, [now.getFullYear() - 2000, now.getMonth() + 1, now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds()], '写RTC');
+}
+function clearMileage(){
+  const a = document.getElementById('clear-trip').checked ? 1 : 0;
+  const b = document.getElementById('clear-total').checked ? 1 : 0;
+  if (!(a || b)){ alert('请至少勾选一项'); return; }
+  if (!confirm('确认清除里程数据?')) return;
+  sendFrame(CMD.CLEAR_MILEAGE, [a, b], '清除里程');
+}
+function writeFindmySn(){
+  const sn = document.getElementById('findmy-sn').value.trim();
+  if (sn.length !== FINDMY_SN_LEN || ![...sn].every(c => { const code = c.charCodeAt(0); return code >= 0x20 && code < 0x7f; })){
+    alert('SN 必须为 ' + FINDMY_SN_LEN + ' 个 ASCII 字符'); return;
+  }
+  if (!confirm('写入 FindMy SN: ' + sn + ' ?')) return;
+  sendFrame(CMD.FINDMY_WRITE_SN, [...sn].map(c => c.charCodeAt(0)), 'FindMy写SN');
+}
+function findmyFactoryReset(){
+  if (!confirm('0xD8-0x31 恢复出厂会清除仪表 NVM 参数并复位默认值, 确认执行?')) return;
+  sendFrame(CMD.PRODUCTION_TEST, [0x31], '恢复出厂');
+}
+function nfcSlot(){
+  const v = parseInt(document.getElementById('nfc-slot').value, 10);
+  return (v >= 0 && v <= 3) ? v : null;
+}
+function nfcBind(){
+  const slot = nfcSlot(); if (slot === null){ alert('卡位范围 0~3'); return; }
+  if (!confirm(`绑定卡位 ${slot}? 点击后请在 10s 内刷一次 NFC 卡`)) return;
+  sendFrame(CMD.NFC_BIND_OR_DELETE, [0x01, slot], `NFC绑定卡位${slot}`);
+}
+function nfcDelete(){
+  const slot = nfcSlot(); if (slot === null){ alert('卡位范围 0~3'); return; }
+  if (!confirm(`删除卡位 ${slot} 的绑定?`)) return;
+  sendFrame(CMD.NFC_BIND_OR_DELETE, [0x00, slot], `NFC删除卡位${slot}`);
+}
+function nfcDeleteAll(){
+  if (!confirm('删除所有已绑定的 NFC 卡?')) return;
+  sendFrame(CMD.NFC_BIND_OR_DELETE, [0xFF, 0x00], 'NFC删除全部');
+}
+
+/* ============================================================
+ * 协议说明
+ * ============================================================ */
+const HELP_TEXT = `帧格式 (User/UartProtocol.h / UartProtocol.c)
+=================================================
+  0x3A | 0x1A | CMD | LEN | DATA[LEN] | SUM_L | SUM_H | 0x0D | 0x0A
+
+  * 0x3A  命令头      UART_PROTOCOL_CMD_HEAD
+  * 0x1A  设备地址    UART_PROTOCOL_CMD_DEVICE_ADDR
+  * LEN   数据字节数 (不含头/地址/命令/长度/校验/结束符)
+  * SUM   从 0x1A 累加到 DATA 末字节, 16 位, 低字节在前
+  * 整帧最小 8 字节, 最大 150 字节
+
+命令一览
+--------
+  0x01 心跳查询       无数据; 应答 1 字节结果 (CAN 链路协议新增)
+  0x52 正常运行状态   收发双向: 仪表->上位机 [PWM, 状态字];
+                      上位机->仪表 [电压|巡航|欠压, 电流, 一圈时间H, 一圈时间L, 错误码]
+  0x53 参数设置       仪表->上位机 7 字节配置参数; 上位机收到后回 0x53 即模拟控制器应答,
+                      仪表随即改报 0x52 运行参数
+  0x80 复位命令       固件当前仅受理, 无动作
+  0xC0 写控制器参数   54 字节, 字段顺序同下方参数表
+  0xC1 写参数结果应答 1 字节: 1 成功
+  0xC2 读控制器参数   无数据
+  0xC3 控制器参数上报 54 字节, 字段顺序同 0xC0
+  0xA6 读标志区       应答 [长度(固定64), 64字节数据] = 16 个标志分区, 每分区 4 字节(高字节在前);
+                      分区: 0老化进入 1老化 2FCT 3半成品 4FQC 5打标 6OQC 7IPQC 8BLE
+                      9UI升级, 10~15 保留未定义
+  0xA7 写标志区       [写入位置0~15, 标志4字节(高字节在前), 写入关机标志];
+                      关机标志 0=不关机 1=关机; 应答 1 字节执行结果
+  0xA8 写版本信息     [类型, 长度, 内容]
+  0xA9 读版本信息     [类型] -> [类型, 长度, 内容]
+  0xAA LCD颜色控制    [颜色] 0/1=红 2=绿 3=蓝 4=白 5/6/7=黑; 应答无数据
+  0xAB 协议切换       [使能, 协议号] 协议号 0=KM5S 1=锂电2号 2=八方V5.2 3=J协议;
+                      应答 [结果]
+  0xAC AD校准         [1=写入 0=读取]; 读取应答 4 字节大端电压 mV, 写入应答 1 字节结果
+  0xAD 按键检测       无数据; 按键弹起时上报 [键值位: bit0 ADD, bit1 KEYM, bit2 DEC, bit3 ADD_DEC]
+  0xAE 时钟检测       无数据, 固件无应答
+  0xAF 光敏检测       无数据; 应答 2 字节大端 ADC
+  0xB0 蓝牙MAC        无数据; 应答 12 字节 MAC (每字节为十六进制字符)
+  0xB5 清除里程       [清TRIP, 清总里程]; 应答 2 字节
+  0xB7 USB插入检测    无数据; 应答 [插入标志, 电流H, 电流L] (未插入时电流为 0)
+  0xB9 NFC刷卡验证    无数据; 固件触发后每 500ms 周期上报 4 字节卡ID(全0=未刷到)
+  0xBA NFC绑定/删除   [操作, 卡位]: 0xFF删所有 0x01绑定 0x00删除 0x02上报已绑卡;
+                      应答 5 字节 [操作, 4字节卡ID]; 绑定时固件每 100ms 上报直到刷卡完成
+  0xBC FINDMY蜂鸣     [1=蜂鸣/0=关闭]; 固件延时约 1s 应答 1 字节状态(1=已回待机)
+  0xBD FINDMY写SN     16 字节 ASCII, 长度不符固件直接回失败;
+                      固件延时约 1s 回读校验后应答 1 字节结果
+  0xBE FINDMY读SN     无数据; 固件延时约 1s 应答 16 字节 SN
+  0xD6 自采电压       无数据; 应答 [0, 电压 4 字节大端] mV
+                      新固件子功能: [0x05, 0/1] 切换大灯开关, 应答 [0x05, 状态]
+  0xD8 产测指令       [子命令]: 0x22 读FindMy版本(应答 [0x22, 4字节版本])
+                      0x23 FindMy复位 0x2C FindMy开机 0x2D FindMy关机
+                      (三者应答 [子命令, 结果]); 0x31 恢复出厂(应答 [0x31])
+  0xBF FLASH容量      无数据; 应答 1 字节 MB
+  0xC4 RTC写          [年(20xx), 月, 日, 时, 分, 秒]; 应答 1 字节结果
+  0xC5 RTC读          无数据; 应答 6 字节 [年(20xx), 月, 日, 时, 分, 秒]
+  0xFF CAN小板参数设置 [CAN波特率, 报文类型]; 应答 1 字节结果
+                      仅 USB转UART转CAN 适配器受理; 收到后重初始化 CAN 控制器,
+                      之后收到的不带 0xFF 的帧原样透传到 CAN 总线。
+                      CAN波特率: 0=100K 1=125K 2=150K 3=200K 4=250K 5=300K 6=400K 7=500K 8=600K 9=800K
+                      报文类型: 0=标准帧(id 0x001) 1=扩展帧
+                      勾选「CAN小板」后自动先下发本命令, 再按原指令透传
+
+54 字节参数顺序 (0xC0 / 0xC3)
+------------------------------
+  1 背光亮度        2 休眠时间        3 年(20xx)       4 月
+  5 日              6 时              7 分             8 系统电压(V)
+  9 助力档位数      10 助力正反       11 助力开始磁钢数 12 助力比例
+  13 转把分档       14 转把限速6km/h  15 缓启动        16 测速磁钢数
+  17~18 欠压门限(0.1V, 高字节在前)    19 限流门限(A)
+  20 助力限速(km/h) 21 轮径代码       22 电量变化时间(s) 23 总线故障超时(s)
+  24 速度平滑等级   25 显示单位(0公制/1英制)             26 有蓝牙
+  27~28 周长(mm, 高字节在前)          29 运行协议
+  30 电量计算方式   31 推车助力功能   32 默认档位      33 LOGO项
+  34 串口通信电平   35 蜂鸣器开关     36 高速蜂鸣提醒  37 定速巡航
+  38~39 开机密码    40~41 菜单密码    42 恢复出厂      43 车型代号
+  44~45 电机功率(W) 46~47 电池容量    48~49 显示轮径(0.1inch)
+  50 轮宽           51~52 服务器车型 53 开机密码开关  54 菜单密码开关
+
+注意
+----
+  * 打开串口后默认只读取 0xA9 类型 0~9 的版本信息, 结果显示在「设备信息」页;
+    测试项 (0x01/0xD6/0xB7/0xBF/0xB0/0xAF/0xC5/0xAC/0xA6/0xC2/0xB9/0xD8-0x22/0xBE)
+    需点「只读测试项」或「重新读取全部」手动执行; 0xAD 按键检测需人工按一次,
+    0xAE 时钟检测固件不返回应答
+  * 0xBC FINDMY蜂鸣不在巡检测试项内, 请在「生产测试」页手动触发(需人工听声确认)
+  * FindMy 相关命令 (0xBC/0xBD/0xBE/0xD8) 的应答由固件经 1~2s 定时器延时后才上报,
+    巡检等待时间比其它项长属正常; 0xB9 触发后固件每 500ms 周期上报卡ID, 以最新一次为准
+  * 0xBD 写SN 要求严格 16 字节; 0xBA 绑定/删除与 0xD8-0x31 恢复出厂为不可逆操作
+  * 0xC0 会把整包参数写入仪表出厂区并设置不恢复出厂标志, 现场使用前请确认参数值
+  * 0xAA 颜色测试会停留在测试画面, 需断电重启或长按电源键退出
+  * 版本信息类型 0~9, 新固件(CanProtocol1)类型 9 = 蓝牙(WLG)固件版本, 旧固件读返回空
+  * 0xC4 写 RTC 后固件会把参数层 RTC 重置为 2000-01-01 12:00:00, 界面时间以读回 0xC5 为准
+
+【Web版说明】
+  * 需使用 Chrome / Edge 浏览器, 且通过 localhost 或 HTTPS 打开本页面 (file:// 无法使用串口)
+  * 版本信息写入按 UTF-8 编码 (纯 ASCII 与固件 GBK 一致; 中文内容请以 ASCII 编码为准)
+`;
+
+/* ============================================================
+ * 事件绑定与初始化
+ * ============================================================ */
+function bindTabs(){
+  document.getElementById('tabs').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-tab]'); if (!btn) return;
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('main section').forEach(s => s.classList.remove('active'));
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+}
+
+function init(){
+  document.getElementById('help-text').textContent = HELP_TEXT;
+  buildInfoTables();
+  buildLcd();
+  buildParamForm();
+  buildTestPage();
+
+  document.getElementById('btn-connect').onclick = connect;
+  document.getElementById('btn-disconnect').onclick = disconnect;
+  document.getElementById('btn-refresh').onclick = pickAndConnect;
+  // 点击串口下拉框时弹出系统串口选择框, 重新选择串口并自动连接
+  document.getElementById('port-sel').addEventListener('mousedown', e => {
+    e.preventDefault();
+    pickAndConnect();
+  });
+  document.getElementById('btn-scan-all').onclick = () => startScan(null);
+  document.getElementById('btn-scan-ver').onclick = () => startScan('ver');
+  document.getElementById('btn-scan-test').onclick = () => startScan('test');
+  document.getElementById('btn-lcd-cycle').onclick = toggleLcdCycle;
+  document.getElementById('btn-lcd-exit').onclick = () => sendFrame(CMD.TEST_LCD, [0], '退出显示测试');
+  document.getElementById('btn-param-read').onclick = () => sendFrame(CMD.READ_CONTROL_PARAM, [], '读参数');
+  document.getElementById('btn-param-write').onclick = writeParam;
+  document.getElementById('btn-param-default').onclick = () => applyParamToForm(paramDefaults());
+  document.getElementById('btn-clear-log').onclick = () => { document.getElementById('log').innerHTML = ''; };
+  document.getElementById('btn-save-log').onclick = saveLog;
+  document.getElementById('btn-reset-stat').onclick = () => { txCount = 0; rxCount = 0; updateCount(); };
+
+  buildCustomCmdSelect();
+  ['custom-cmd', 'custom-len', 'custom-data'].forEach(id => {
+    document.getElementById(id).addEventListener('input', refreshCustomPreview);
+  });
+  document.getElementById('btn-custom-send').onclick = sendCustom;
+  document.getElementById('btn-custom-clear').onclick = () => {
+    document.getElementById('custom-cmd').value = '';
+    document.getElementById('custom-len').value = '';
+    document.getElementById('custom-data').value = '';
+    refreshCustomPreview();
+  };
+
+  document.getElementById('auto-reply').onchange = e => { autoReply = e.target.checked; };
+  document.getElementById('can-enable').onchange = e => {
+    canEnabled = e.target.checked;
+    if (canEnabled && port){ canConfigured = false; configureCan(); }
+    else log('INFO', '已切回 UART 透传模式');
+  };
+  document.getElementById('btn-can-apply').onclick = () => {
+    canEnabled = document.getElementById('can-enable').checked;
+    canBaud = parseInt(document.getElementById('can-baud').value, 10);
+    canExtended = parseInt(document.getElementById('can-frame').value, 10);
+    if (port && canEnabled) configureCan();
+    else if (port) log('INFO', 'CAN小板参数待下发, 勾选后生效');
+  };
+
+  // 监听设备物理插拔, 自动刷新已授权串口列表
+  if (navigator.serial.addEventListener){
+    navigator.serial.addEventListener('connect', e => {
+      log('INFO', '检测到串口设备接入: ' + portLabel(e.target));
+      refreshPorts();
+    });
+    navigator.serial.addEventListener('disconnect', e => {
+      log('WARN', '串口设备已移除: ' + portLabel(e.target));
+      if (port === e.target){
+        port = null; closing = true;
+        document.getElementById('conn-status').textContent = '未连接';
+        document.getElementById('conn-status').className = 'status off';
+        document.getElementById('btn-connect').disabled = false;
+        document.getElementById('btn-disconnect').disabled = true;
+        cancelScan();
+      }
+      refreshPorts();
+    });
+  }
+
+  refreshPorts();
+  bindTabs();
+  log('INFO', '上位机就绪, 协议: 3A 1A CMD LEN DATA SUM_L SUM_H 0D 0A');
+  log('INFO', 'Web版需在 Chrome/Edge 中通过 localhost 或 HTTPS 打开, 并授予串口访问权限');
+}
+
+/* --- 自定义下发 --- */
+function parseHexBytes(str){
+  const cleaned = str.replace(/0x/gi, '').replace(/[^0-9a-fA-F]/g, ' ');
+  const tokens = cleaned.trim().split(/\s+/).filter(Boolean);
+  const bytes = [];
+  for (let tok of tokens){
+    if (tok.length % 2 !== 0) tok = '0' + tok;
+    for (let i = 0; i < tok.length; i += 2) bytes.push(parseInt(tok.slice(i, i + 2), 16));
+  }
+  return bytes;
+}
+function refreshCustomPreview(){
+  const preview = document.getElementById('custom-preview');
+  const cmdText = document.getElementById('custom-cmd').value.trim();
+  const dataText = document.getElementById('custom-data').value;
+  const lenText = document.getElementById('custom-len').value.trim();
+  if (!cmdText){ preview.textContent = '(输入命令字后显示)'; preview.style.color = '#999'; return; }
+  const cmd = parseInt(cmdText, 16);
+  if (isNaN(cmd) || cmd < 0 || cmd > 255){ preview.textContent = '命令字非法, 应为 0x00~0xFF'; preview.style.color = 'var(--red)'; return; }
+  const data = dataText.trim() ? parseHexBytes(dataText) : [];
+  if (lenText){
+    const len = parseInt(lenText, 10);
+    if (isNaN(len) || len < 0 || len > LEN_MAX_DATA){ preview.textContent = '数据长度非法, 范围 0~' + LEN_MAX_DATA; preview.style.color = 'var(--red)'; return; }
+    if (len !== data.length){ preview.textContent = `数据长度 ${len} 与实际数据字节数 ${data.length} 不一致`; preview.style.color = 'var(--red)'; return; }
+  }
+  if (data.length > LEN_MAX_DATA){ preview.textContent = '数据超过 ' + LEN_MAX_DATA + ' 字节'; preview.style.color = 'var(--red)'; return; }
+  try {
+    preview.textContent = hexStr(buildFrame(cmd, data));
+    preview.style.color = '';
+  } catch(e){ preview.textContent = e.message; preview.style.color = 'var(--red)'; }
+}
+function sendCustom(){
+  const cmdText = document.getElementById('custom-cmd').value.trim();
+  if (!cmdText){ alert('请输入命令字'); return; }
+  const cmd = parseInt(cmdText, 16);
+  if (isNaN(cmd) || cmd < 0 || cmd > 255){ alert('命令字非法, 应为 0x00~0xFF'); return; }
+  const dataText = document.getElementById('custom-data').value;
+  const data = dataText.trim() ? parseHexBytes(dataText) : [];
+  const lenText = document.getElementById('custom-len').value.trim();
+  if (lenText){
+    const len = parseInt(lenText, 10);
+    if (isNaN(len) || len !== data.length){ alert('数据长度与实际数据字节数不一致'); return; }
+  }
+  if (data.length > LEN_MAX_DATA){ alert('数据超过 ' + LEN_MAX_DATA + ' 字节'); return; }
+  sendFrame(cmd, data, '自定义下发');
+}
+function buildCustomCmdSelect(){
+  const sel = document.getElementById('custom-cmd-sel');
+  Object.keys(CMD_NAMES).map(Number).sort((a, b) => a - b).forEach(cmd => {
+    const o = document.createElement('option');
+    o.value = '0x' + hexByte(cmd);
+    o.textContent = CMD_NAMES[cmd];
+    sel.appendChild(o);
+  });
+  sel.onchange = () => {
+    if (sel.value){
+      document.getElementById('custom-cmd').value = sel.value;
+      refreshCustomPreview();
+    }
+  };
+}
+
+function saveLog(){
+  const text = document.getElementById('log').innerText;
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const d = new Date();
+  const p = x => String(x).padStart(2, '0');
+  a.download = `km5s_log_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+if (!('serial' in navigator)){
+  document.addEventListener('DOMContentLoaded', () => {
+    log('ERR', '当前浏览器不支持 Web Serial API, 请改用 Chrome 或 Edge');
+  });
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>
